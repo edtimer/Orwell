@@ -7,6 +7,8 @@ export { OutroSeparador } from "./screens/gate/OutroSeparador.js"
 // The splash screen, which the web draws on startup before the gate decides: it matches what
 // the gate shows next, with no jump between them.
 export { Splash } from "./screens/gate/Splash.js"
+// The theme on the root before the first frame. The desktop renderer calls it before `render`.
+export { aplicarTemaCedo } from "./tema-cedo.js"
 // The invite with which the page opened: startup data only the web has.
 export type { StartupInvite } from "./lib/conviteDeArranque.js"
 // And the pairing link with which it opened: the phone joining an account.

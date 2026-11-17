@@ -39,8 +39,9 @@ describe("o painel de controlo (P1)", () => {
 
   it("a caixa da chamada é verde ténue, com raio 12, e o verde forte fica só na medida", () => {
     const caixa = bloco(".call-dock.lateral")
-    expect(caixa).toMatch(/border:\s*1px solid rgba\(80, 250, 123, 0\.28\)/)
-    expect(caixa).toMatch(/background:\s*rgba\(80, 250, 123, 0\.06\)/)
+    // A tint of `--ok`, so it follows the theme (1.4): it was a fixed neon rgba.
+    expect(caixa).toMatch(/border:\s*1px solid color-mix\(in srgb, var\(--ok\) 28%, transparent\)/)
+    expect(caixa).toMatch(/background:\s*color-mix\(in srgb, var\(--ok\) 8%, transparent\)/)
     expect(caixa).toMatch(/border-radius:\s*12px/)
     expect(caixa).not.toContain("--presenca")
     expect(bloco(".call-dock.lateral .call-dock-texto")).toMatch(/color:\s*var\(--presenca\)/)

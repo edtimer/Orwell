@@ -75,7 +75,7 @@ describe("o splash no index.html", () => {
   it("o guião marca a língua pela regra do arranque: o endereço, a escolha guardada, e inglês sem escolha", async () => {
     const { guiao } = await correr()
     const marcar = (o: { href: string; guardada?: string; sistema: string[] }): string => {
-      const html = { lang: "pt" }
+      const html = { lang: "pt", dataset: {} as Record<string, string> }
       const correrGuiao = new Function("document", "navigator", "localStorage", "window", guiao) as (...a: unknown[]) => void
       correrGuiao(
         { documentElement: html },
@@ -92,5 +92,25 @@ describe("o splash no index.html", () => {
     expect(marcar({ href: "https://orwell.pt/app/", sistema: ["pt-PT"] })).toBe("en")
     expect(marcar({ href: "https://orwell.pt/app/", guardada: "pt", sistema: ["en-US"] })).toBe("pt")
     expect(marcar({ href: "https://orwell.pt/app/?lingua=en", guardada: "pt", sistema: ["pt-PT"] })).toBe("en")
+  })
+
+  it("o guião põe também o tema guardado na raiz, antes do primeiro frame (1.4)", async () => {
+    const { guiao } = await correr()
+    const tema = (prefs: string | null): string | undefined => {
+      const html = { lang: "pt", dataset: {} as Record<string, string> }
+      const correrGuiao = new Function("document", "navigator", "localStorage", "window", guiao) as (...a: unknown[]) => void
+      correrGuiao(
+        { documentElement: html },
+        { languages: ["en"], language: "en" },
+        { getItem: (chave: string) => (chave === "enclave.prefs" ? prefs : null) },
+        { location: { href: "https://orwell.pt/app/" } },
+      )
+      return html.dataset.theme
+    }
+    expect(tema(JSON.stringify({ tema: "claro" }))).toBe("claro")
+    expect(tema(JSON.stringify({ tema: "sistema" }))).toBe("sistema")
+    // Nothing stored, or junk: dark, the default.
+    expect(tema(null)).toBe("escuro")
+    expect(tema("{estragado")).toBe("escuro")
   })
 })

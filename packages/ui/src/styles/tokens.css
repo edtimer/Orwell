@@ -1,213 +1,184 @@
 /* ----------------------------------------------------------------- tokens */
 
 /*
-  The "Tokyo Rain, midnight" skin, the approved one
-  (boards `ChuvaMidnight`, `ChamadaVoz`, `ChamadaEcra`).
-  
-  Two layers of names, and the rule between them:
-  
-  1. The skin tokens, in Portuguese (`--fundo`, `--vidro`, `--texto`, ...). They
-  are the board values, written once. A new skin color starts here.
-  2. The paper tokens that the sheets use (`--bg-side`, `--text-dim`,
-  `--accent`, ...). They point to the skin tokens. Sheets have used these
-  names since before the skin, and keep using them: changing the skin means
-  changing layer 1.
-  
-  No sheet writes a skin color by hand. The contrast for small text (4.5:1) is
-  measured in `usePrefs.test.ts` and `roleColours.test.ts`, on the solid
-  surfaces here.
-  */
+  The skin: flat, layered neutrals with one cyan accent, in two themes.
+
+  Three layers of names, and the rule between them:
+
+  1. The THEME values (`--fundo`, `--vidro-solido`, `--bg-main`, `--texto`,
+     `--acento`, ...). Written once per theme: dark in `:root`, light in the
+     two blocks at the bottom. A new theme color starts here, and only here.
+  2. The ROLE names the sheets use (`--bg-side`, `--text-dim`, `--accent`,
+     `--danger`, ...). They point at layer 1 and never change per theme.
+     Sheets have used these names for a long time and keep using them.
+  3. The shadcn-style names (`--background`, `--foreground`, `--card`,
+     `--popover`, `--primary`, `--muted-foreground`, `--border`, `--input`,
+     `--ring`, `--destructive`, `--sidebar`). New CSS should prefer these.
+     They also point at layer 1. `--accent` is NOT redefined shadcn-style:
+     here it has always meant the brand color as text, and 19k lines depend on it.
+
+  Surfaces go from deepest to highest, like Discord: rail, then sidebar and
+  member list, then the conversation, then raised controls. Floats (menus,
+  sheets, popovers) are solid, with a hairline border and a shadow.
+
+  The theme is the `data-theme` attribute on `<html>` (`usePrefs.ts`,
+  `aplicarTemaCedo`): absent or "escuro" is dark, "claro" is light, and
+  "sistema" follows `prefers-color-scheme`.
+
+  Every text tier is measured at 4.5:1 or better against every surface, in
+  both themes; presence dots at 3:1 (`tokens.contraste.test.ts`).
+*/
 :root {
-  /* ------------------------------------------------------------- a pele */
+  color-scheme: dark;
 
-  /* The page background. Everything else sits on it. */
-  --fundo: #080c1a;
-  /* The glass of panels (sidebar, header, messages, cards). */
-  --vidro: rgba(14, 20, 40, 0.66);
-  --vidro-contorno: rgba(139, 233, 253, 0.09);
-  /* Composite glass over the background, as solid color: for rings, veils and
-     anything that can't let you see what's underneath (a transparent ring lets
-     you see the color at that exact spot). */
-  --vidro-solido: #0c1123;
-  /* The well: input fields, control buttons and the account card. Darker than
-     glass, because that's where you type and tap. */
-  --poco: rgba(6, 9, 20, 0.6);
-  --poco-contorno: rgba(139, 233, 253, 0.14);
-  /* Sheets, menus and alerts that float on top of everything. */
-  --flutuante: rgba(12, 17, 34, 0.95);
+  /* ----------------------------------------- layer 1: dark theme values */
 
-  --texto: #e6ecff;
-  --titulo: #f1f4ff;
-  --secundario: #b9c3e0;
-  --apagado: #9aa6c8;
-  --discreto: #8591b8;
+  /* Surfaces, deepest first. */
+  --fundo: #17181b; /* the rail, the gate backdrop */
+  --vidro-solido: #1e1f23; /* sidebar, member list */
+  --bg-main: #25262b; /* the conversation */
+  --bg-raised: #2c2e33; /* cards, inputs, chips */
+  --bg-hover: #33353b; /* rows and buttons under the cursor */
+  --flutuante: #18191c; /* menus, sheets, popovers, toasts */
+  --poco: #1e1f23; /* wells: fields and the account card buttons */
+  --line: rgb(255 255 255 / 0.07);
+  --line-forte: rgb(255 255 255 / 0.12);
+  --veu: rgb(0 0 0 / 0.7); /* the scrim behind a sheet */
 
-  /* The chosen accent (see `ACCENTS` in `usePrefs.ts`). Cyan by default. */
+  /* Text, from loudest to quietest. */
+  --titulo: #f2f3f5;
+  --texto: #dbdee1;
+  --secundario: #b5bac1;
+  --apagado: #a1a6ae;
+  --discreto: #9ea2aa;
+
+  /* Brand: cyan, rgb(139, 233, 253). `--acento` is safe as text, outline and
+     focus ring on every surface; `--acento-cheio` is the fill, with the dark
+     `--tinta-acento` on top (13.5:1); `--acento-cheio-sobre` is the fill under
+     the cursor, lighter, never muddier. In the light theme the fill stays the
+     same cyan and the text tone deepens, because pale cyan on white is 1.4:1. */
   --acento: #8be9fd;
-  --indigo: #8b93e0;
-  /* Error, badge and logout only. */
-  --rosa: #e070a8;
-  --presenca: #50fa7b;
-  /* Dark text on the accent, pink and green. */
-  --tinta: #080c1a;
+  --acento-cheio: #8be9fd;
+  --acento-cheio-sobre: #b3f1fe;
+  --tinta-acento: #0a1418;
+  --indigo: #949cf7;
+  /* Danger: `--rosa` as text, `--rosa-cheio` as a fill under white. */
+  --rosa: #ff7a7c;
+  --rosa-cheio: #d83c3e;
+  --presenca: #23a55a;
+  /* White: the ink on the red fill. The ink on the brand is `--tinta-acento`. */
+  --tinta: #ffffff;
 
-  --fonte: "Space Grotesk", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
-  /* The same, with our emoji font before the system's: for the picker, the reaction chips, the messages and the box. See `fontes.css`. */
-  --fonte-com-emoji: "Space Grotesk", "Noto Sans JP", "Orwell Emoji", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* "Reconnecting": a paler lime than the amber of "away", so the two never read alike. */
+  --warning: #e8df7a;
+  --presence-online: var(--presenca);
+  --presence-away: #f0b232;
+  --presence-busy: #f23f43;
+  --presence-offline: #80848e;
 
-  /* ------------------------------------------------ roles, on the skin */
+  /* Shadow and highlight as triplets: `rgb(var(--sombra-cor) / 0.5)`. */
+  --sombra-cor: 0 0 0;
+  --brilho-cor: 255 255 255;
+  --sombra-forca: 1;
 
-  /* Surfaces, from deepest to highest. Solids: contrast is measured against them. */
+  /* ---------------------------------------------- layer 2: role names */
+
   --bg-deep: var(--fundo);
   --bg-rail: var(--fundo);
   --bg-side: var(--vidro-solido);
-  --bg-main: #0b1020;
-  --bg-raised: #131a33;
-  --bg-hover: #192241;
-  --line: rgba(139, 233, 253, 0.12);
 
-  /* Text */
   --text: var(--texto);
   --text-dim: var(--apagado);
   --text-faint: var(--discreto);
 
-  /* Accent. The color picker writes `--accent` and `--accent-deep` to the
-     document (`usePrefs.ts`). On midnight skin the accent is bright, and the
-     accent fill (`--accent-deep`) is the accent itself, with dark `--on-accent`
-     on top: the design of the sheets (chips, badges, primary buttons, avatars).
-     The literals here are cyan, so the login screen starts in the default color. */
+  /* `--accent` is the brand as text, outline and small marks; `--accent-deep`
+     is the brand as a fill, always with `--on-accent` on top. Sheets that
+     paint a background in the brand use `--accent-deep`. */
   --accent: var(--acento);
-  --accent-deep: var(--acento);
-  /* Contrast check against the five accents in `usePrefs.test.ts`: 6.5:1 or better. */
-  --on-accent: var(--tinta);
-  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-deep: var(--acento-cheio);
+  --accent-deep-hover: var(--acento-cheio-sobre);
+  --on-accent: var(--tinta-acento);
+  --accent-soft: color-mix(in srgb, var(--acento-cheio) 16%, transparent);
 
-  /* Semantic colours.
-     State is NEVER the accent: green must mean online whichever colour the
-     person picked. These are fixed, and readable on every dark surface. */
+  /* State is never the accent: green means online whatever the theme. */
   --danger: var(--rosa);
+  --danger-fill: var(--rosa-cheio);
   --on-danger: var(--tinta);
-  --warning: #f1fa8c;
   --ok: var(--presenca);
-  /* Presence states, in the order a person meets them.
 
-The map is Discord's: green
-online, yellow away, red busy ("do not disturb"), gray offline or invisible.
-Busy was amber (#ffb86c) and changed to red so the ring and dot say the same.
-Red is not the `--rosa` of "no connection": one is the person's choice, the
-other is a failure. Yellow is not the `--warning` lime of "reconnecting", which
-pulses. Both measure 3:1 or better against all surfaces (`aneisDePresenca.contraste.test.ts`). */
-  --presence-online: var(--presenca);
-  --presence-away: #f5c84c;
-  --presence-busy: #ff5c5c;
-  --presence-offline: #4a5578;
-
-  /* ------------------------------------------------------- profundidade */
-
-  /* Shadow color and highlight color, as triplets without alpha: used in
-     `rgb(var(--sombra-cor) / 0.5)`, and opacity is left to the caller. */
-  --sombra-cor: 0 0 0;
-  --brilho-cor: 255 255 255;
-
-  /* Three tiers: the pill and actions of a message; menus; floating panels and sheets. */
-  --sombra-1: 0 4px 14px rgb(var(--sombra-cor) / 0.35);
-  --sombra-2: 0 12px 30px rgb(var(--sombra-cor) / 0.5);
-  --sombra-3: 0 16px 44px rgb(var(--sombra-cor) / 0.5);
-
-  /* ------------------------------------------------------------ panels */
+  /* Depth: three tiers. The message actions; menus; sheets. */
+  --sombra-1: 0 1px 2px rgb(var(--sombra-cor) / calc(0.3 * var(--sombra-forca))),
+    0 2px 8px rgb(var(--sombra-cor) / calc(0.16 * var(--sombra-forca)));
+  --sombra-2: 0 4px 12px rgb(var(--sombra-cor) / calc(0.32 * var(--sombra-forca))),
+    0 8px 24px rgb(var(--sombra-cor) / calc(0.2 * var(--sombra-forca)));
+  --sombra-3: 0 8px 24px rgb(var(--sombra-cor) / calc(0.36 * var(--sombra-forca))),
+    0 16px 48px rgb(var(--sombra-cor) / calc(0.24 * var(--sombra-forca)));
 
   /*
-    Ink color for surfaces above the aurora (see `paineis.css`). Until 0.8.3
-    it was liquid glass (ink at 64% over a blur); it was removed
-    and the aurora kept. Now inks are nearly solid and there
-    is no filter: the aurora shows through below, and text is measured as if on
-    a solid surface.
-
-    Calculations in `barraMinima.test.tsx` and `paineis.test.ts`: with the
-    brightest patch of aurora at maximum below, the weakest panel text
-    (`--discreto`) and rose stay well above 4.5:1. Live measurement against
-    screenshots is in `scripts/retratar-midnight.mjs`.
-
-    The names `--vidro`, `--vidro-contorno`, `--vidro-solido`, `--vidro-escuro`
-    and `--vidro-anel-*` (top and bottom) are from the skin of 20 October, before
-    liquid glass, and the website uses them too: they keep the old name.
+    Panels. These names come from the glass skin (before 1.4) and many sheets
+    still use them. They are all solid now: fixed panels take the color of the
+    surface they are, floats are more raised, and nothing is translucent.
   */
-
-  /* Fixed panels: rail, sidebar, headers, members, input bar, cards, login screen,
-     profile page, call. Color is `--vidro-solido`. */
-  --painel-tinta: rgba(12, 17, 35, 0.9);
-  /* The wall card under the cursor, and the role the person holds. */
-  --painel-claro: rgba(22, 30, 58, 0.9);
-  /* Sheets, menus and alerts: more opaque than panels, because they sit over text
-     and the text below must not be readable through them. */
+  --painel-tinta: var(--vidro-solido);
+  --painel-claro: var(--bg-hover);
   --painel-flutuante: var(--flutuante);
-  /* The well for profile page actions and role assignment. */
-  --painel-poco: rgba(6, 9, 20, 0.92);
-  /* What goes inside a panel, and balloons and rail buttons: over nearly solid
-     ink, or tiny and very. Unchanged since 0.8.3. */
-  --painel-interior: rgba(10, 14, 32, 0.64);
-  /* The call minimum bar (`barraMinima.test.tsx`). */
-  --painel-barra: rgba(8, 12, 26, 0.9);
-  /* Mobile drawers: solid. */
+  --painel-poco: var(--poco);
+  --painel-interior: var(--bg-raised);
+  --painel-barra: var(--flutuante);
   --painel-gaveta: var(--vidro-solido);
+  --painel-borda: var(--line);
+  --painel-aresta: 0 0 #0000;
+  --painel-sombra: 0 0 #0000;
+  --painel-raio: var(--radius-lg);
 
-  /* The outline is the chosen accent, and it follows it. */
-  --painel-borda: color-mix(in srgb, var(--accent) 16%, transparent);
-  /* The bright line inside and the relief (light on top, shadow below). */
-  --painel-aresta: inset 0 0 0 1px rgb(var(--brilho-cor) / 0.07), inset 0 1px 0 rgb(var(--brilho-cor) / 0.1),
-    inset 0 -10px 24px rgb(var(--sombra-cor) / 0.16);
-  /* Deep shadow below a panel. */
-  --painel-sombra: 0 12px 40px rgb(var(--sombra-cor) / 0.35);
-  /* The radius: `.call-chip` is 20, panels are 18. */
-  --painel-raio: 18px;
+  /* Old glass names, kept as aliases: no surface is glass any more. */
+  --vidro: var(--vidro-solido);
+  --vidro-contorno: var(--line);
+  --poco-contorno: var(--line-forte);
+  --vidro-escuro: var(--poco);
+  --vidro-anel-1: var(--acento-cheio);
+  --vidro-anel-2: var(--indigo);
 
-  /* Dark background of the account card: solid glass at 75%, over the sidebar ink. */
-  --vidro-escuro: color-mix(in srgb, var(--vidro-solido) 75%, transparent);
-  /* The two colors of the outline spinning around the account card. The first
-     is the accent, and follows the color the person chose; the second is a fixed
-     violet, which did not exist in the skin. */
-  --vidro-anel-1: var(--acento);
-  --vidro-anel-2: #b28bff;
+  --portao-contorno: var(--line);
+  --portao-brilho: transparent;
 
-  /* The aurora, behind the entire app (see `fundo.css`): four patches that blur
-     at 60 px and move slowly, 24 s round trip. Until 0.8.2 only the call room had them. */
-  --aurora-azul: rgba(64, 170, 255, 0.5);
-  --aurora-violeta: rgba(150, 90, 255, 0.5);
-  --aurora-rosa: rgba(255, 90, 170, 0.35);
-  --aurora-verde: rgba(60, 230, 200, 0.32);
-  --aurora-desfoque: 60px;
-  --aurora-volta: 24s;
+  /* --------------------------------------- layer 3: shadcn-style roles */
 
-  /* ------------------------------------------------------------- fundo */
+  --background: var(--bg-main);
+  --foreground: var(--texto);
+  --card: var(--bg-raised);
+  --card-foreground: var(--texto);
+  --popover: var(--flutuante);
+  --popover-foreground: var(--texto);
+  --primary: var(--acento-cheio);
+  --primary-foreground: var(--tinta-acento);
+  --secondary: var(--bg-raised);
+  --secondary-foreground: var(--titulo);
+  --muted: var(--bg-raised);
+  --muted-foreground: var(--apagado);
+  --border: var(--line);
+  --input: var(--line-forte);
+  --ring: var(--acento);
+  --destructive: var(--rosa-cheio);
+  --destructive-foreground: var(--tinta);
+  --sidebar: var(--vidro-solido);
+  --sidebar-foreground: var(--secundario);
+  --rail: var(--fundo);
 
-  /* Fine rain (see `fundo.css`). The strokes are nearly invisible on purpose:
-     texture, not drawing. */
-  --chuva-cor: rgba(150, 190, 255, 0.035);
-  --chuva-cor-2: rgba(139, 233, 253, 0.03);
-  --chuva-opacidade: 0.5;
+  /* ------------------------------------------------- type, space, form */
 
-  /* ------------------------------------------------------------ login screen */
+  --fonte: "Inter Variable", "Inter", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* The same, with our emoji font before the system's: for the picker, the
+     reaction chips, the messages and the box. See `fontes.css`. */
+  --fonte-com-emoji: "Inter Variable", "Inter", "Noto Sans JP", "Orwell Emoji", system-ui, -apple-system,
+    "Segoe UI", sans-serif;
 
-  /* The outline of the login screen card: the cyan of glass, a bit firmer,
-     because the card is alone on screen and must be readable at first glance. */
-  --portao-contorno: rgba(139, 233, 253, 0.16);
-  /* The shine of the ring and mark on the opening. */
-  --portao-brilho: rgba(139, 233, 253, 0.35);
   /* The side of the opening signal (the ring); the mark takes up half. */
   --abertura-lado: 112px;
-  /* The turns of the opening: the ring and the banners lighting up. The phase of each
-     counts from the first page load (the `startTime` that `abertura-viva.ts` sets
-     at each mount), so splashes in sequence do not jump when switching. */
-  /* 1.1 s: until 26 October 2026 it was 2.4 s with a 1.5 px arc, and the owner
-     could not see anything rotating. The request was "a circular animation":
-     an arc you see going around. */
-  /* 2.2 s since 28 October 2026: the turn is no longer constant (`abertura-gira-vivo`,
-     in `pele.css`); the fast sections move at the pace of the 1.1 s before, and the
-     slow section is what needs the extra time. */
+  /* The opening ring's turn and the banners lighting up (`pele.css`). */
   --abertura-volta: 2.2s;
   --abertura-tarjas: 2.8s;
 
-  /* Spacing */
   --space-1: 2px;
   --space-2: 4px;
   --space-3: 8px;
@@ -216,7 +187,6 @@ pulses. Both measure 3:1 or better against all surfaces (`aneisDePresenca.contra
   --space-6: 24px;
   --space-7: 32px;
 
-  /* Type */
   --font-xs: 11px;
   --font-sm: 12px;
   --font-base: 14px;
@@ -225,24 +195,93 @@ pulses. Both measure 3:1 or better against all surfaces (`aneisDePresenca.contra
   --font-xl: 22px;
   --font-mono: ui-monospace, "Cascadia Mono", monospace;
 
-  /* Radii. Glass radii are from the sheets: 14 in panels, 10 in rows. */
+  /* One radius scale: 4 for small marks and inputs, 8 for buttons, rows and
+     cards, 12 for sheets and large panels. */
   --radius-sm: 4px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-full: 999px;
   --radius: var(--radius-md); /* legacy alias */
 
-  /* Motion */
   --dur-fast: 120ms;
   --dur: 200ms;
   --ease: cubic-bezier(0.2, 0.8, 0.3, 1);
 
-  /* Z-index */
   --z-panel: 10;
   --z-overlay: 100;
   --z-modal: 110;
   --z-menu: 120;
   --z-toast: 130;
+}
 
-  color-scheme: dark;
+/* ------------------------------------------------------- light theme */
+
+/*
+  Written twice, on purpose: once for the explicit choice and once for
+  "System" when the OS is light. A media query cannot join a selector list,
+  and resolving "system" in JavaScript would flash on load.
+  Keep the two blocks identical (`tokens.contraste.test.ts` checks it).
+*/
+:root[data-theme="claro"] {
+  color-scheme: light;
+  --fundo: #e3e5e8;
+  --vidro-solido: #f2f3f5;
+  --bg-main: #ffffff;
+  --bg-raised: #ebedef;
+  --bg-hover: #e3e5e8;
+  --flutuante: #ffffff;
+  --poco: #ebedef;
+  --line: rgb(6 6 7 / 0.1);
+  --line-forte: rgb(6 6 7 / 0.16);
+  --veu: rgb(0 0 0 / 0.45);
+  --titulo: #060607;
+  --texto: #2e3338;
+  --secundario: #4e5058;
+  --apagado: #5c5e66;
+  --discreto: #62646c;
+  --acento: #0b6a82;
+  --acento-cheio: #8be9fd;
+  --acento-cheio-sobre: #6cdcf5;
+  --indigo: #5865f2;
+  --rosa: #b3242a;
+  --rosa-cheio: #d83c3e;
+  --presenca: #1d8a4b;
+  --warning: #6e6400;
+  --presence-away: #b87400;
+  --presence-busy: #d9363a;
+  --presence-offline: #72757e;
+  --sombra-forca: 0.45;
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="sistema"] {
+    color-scheme: light;
+    --fundo: #e3e5e8;
+    --vidro-solido: #f2f3f5;
+    --bg-main: #ffffff;
+    --bg-raised: #ebedef;
+    --bg-hover: #e3e5e8;
+    --flutuante: #ffffff;
+    --poco: #ebedef;
+    --line: rgb(6 6 7 / 0.1);
+    --line-forte: rgb(6 6 7 / 0.16);
+    --veu: rgb(0 0 0 / 0.45);
+    --titulo: #060607;
+    --texto: #2e3338;
+    --secundario: #4e5058;
+    --apagado: #5c5e66;
+    --discreto: #62646c;
+    --acento: #0b6a82;
+    --acento-cheio: #8be9fd;
+    --acento-cheio-sobre: #6cdcf5;
+    --indigo: #5865f2;
+    --rosa: #b3242a;
+    --rosa-cheio: #d83c3e;
+    --presenca: #1d8a4b;
+    --warning: #6e6400;
+    --presence-away: #b87400;
+    --presence-busy: #d9363a;
+    --presence-offline: #72757e;
+    --sombra-forca: 0.45;
+  }
 }

@@ -209,7 +209,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-deep);
   border: 2px solid var(--bg-rail);
   box-sizing: content-box;
 }
@@ -416,7 +416,7 @@ label.checkbox {
 }
 
 .interruptor[aria-checked="true"] .interruptor-pista {
-  background: var(--accent);
+  background: var(--accent-deep);
 }
 
 .interruptor[aria-checked="true"] .interruptor-botao {
@@ -853,7 +853,7 @@ select:focus {
 .aviso-amigo-vida > span {
   display: block;
   height: 100%;
-  background: var(--accent);
+  background: var(--accent-deep);
   transform-origin: left center;
   animation: aviso-amigo-vida var(--vida-do-aviso, 2000ms) linear both;
 }
@@ -1846,8 +1846,8 @@ span.mention {
 
 .mention:hover,
 .mention:focus-visible {
-  background: var(--accent);
-  color: var(--bg-main);
+  background: var(--accent-deep);
+  color: var(--on-accent);
 }
 
 /* ------------------------------------------------- mention suggestions */

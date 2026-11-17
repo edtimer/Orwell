@@ -17,7 +17,6 @@ const tokens = semComentarios(ler("../styles/tokens.css"))
 const componentes = semComentarios(ler("../styles/components.css"))
 
 type Rgb = readonly [number, number, number]
-type Rgba = readonly [number, number, number, number]
 
 /** A token, followed by `var()` until a literal is reached. */
 function token(nome: string): string {
@@ -33,11 +32,6 @@ const rgb = (hex: string): Rgb => {
   return [(v >> 16) & 255, (v >> 8) & 255, v & 255]
 }
 
-function rgba(nome: string): Rgba {
-  const m = /rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/.exec(token(nome))
-  if (!m) throw new Error(`${nome} não é rgba`)
-  return [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])] as const
-}
 
 function luminance([r, g, b]: Rgb): number {
   const linear = (channel: number): number => {
@@ -53,30 +47,21 @@ function contrast(a: Rgb, b: Rgb): number {
   return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05)
 }
 
-const compor = (base: Rgb, [r, g, b, a]: Rgba): Rgb =>
-  [base[0] + (r - base[0]) * a, base[1] + (g - base[1]) * a, base[2] + (b - base[2]) * a] as const
 
 /** The distance between two colors, so red is not read as pink. */
 const distancia = (a: Rgb, b: Rgb): number => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2])
 
-const fundo = rgb(token("--fundo"))
-const manchas = ["--aurora-azul", "--aurora-violeta", "--aurora-rosa", "--aurora-verde"].map(rgba)
-const tintas = ["--painel-tinta", "--painel-claro", "--painel-barra", "--painel-poco"]
-
-/** Where faces are: the solid surfaces, and each panel color on each dawn tint. */
-const superficies: Record<string, Rgb> = {
-  "--fundo": fundo,
-  "--bg-side": rgb(token("--bg-side")),
-  "--bg-main": rgb(token("--bg-main")),
-  "--bg-raised": rgb(token("--bg-raised")),
-  "--bg-hover": rgb(token("--bg-hover")),
-  ...Object.fromEntries(
-    tintas.flatMap((tinta) => [
-      [`${tinta} sobre o fundo`, compor(fundo, rgba(tinta))],
-      ...manchas.map((mancha, i) => [`${tinta} sobre a mancha ${i + 1}`, compor(compor(fundo, mancha), rgba(tinta))]),
-    ]),
-  ),
-}
+/**
+ * Where faces are: every solid surface of the dark theme (the default; the
+ * light theme is measured in `styles/tokens.contraste.test.ts`). Since 1.4
+ * there is no aurora under the panels: the surfaces are what they say.
+ */
+const superficies: Record<string, Rgb> = Object.fromEntries(
+  ["--fundo", "--bg-side", "--bg-main", "--bg-raised", "--bg-hover", "--flutuante", "--poco"].map((nome) => [
+    nome,
+    rgb(token(nome)),
+  ]),
+)
 
 describe("anéis de presença — as regras que estas contas supõem", () => {
   it("cada estado tem a sua cor, e o cinzento é a por omissão", () => {

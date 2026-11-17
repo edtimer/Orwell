@@ -25,17 +25,11 @@ function token(nome: string): string {
 }
 
 type Rgb = readonly [number, number, number]
-type Rgba = readonly [number, number, number, number]
 const rgb = (hex: string): Rgb => {
   const v = Number.parseInt(hex.slice(1), 16)
   return [(v >> 16) & 255, (v >> 8) & 255, v & 255]
 }
 
-function rgbaDe(nome: string): Rgba {
-  const m = new RegExp(`${nome}:\\s*rgba\\((\\d+),\\s*(\\d+),\\s*(\\d+),\\s*([\\d.]+)\\)`).exec(tokens)
-  if (!m) throw new Error(`falta ${nome} em tokens.css`)
-  return [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])] as const
-}
 
 /** WCAG relative luminance, as in `usePrefs.test.ts`. */
 function luminance([r, g, b]: Rgb): number {
@@ -53,28 +47,21 @@ function contrast(a: Rgb, b: Rgb): number {
 }
 
 /** An `rgba` layer on top of a solid color. */
-const compor = (base: Rgb, [r, g, b, a]: Rgba): Rgb =>
+const compor = (base: Rgb, [r, g, b, a]: readonly [number, number, number, number]): Rgb =>
   [base[0] + (r - base[0]) * a, base[1] + (g - base[1]) * a, base[2] + (b - base[2]) * a] as const
 
-/** `color-mix(in srgb, cor P%, branco)`, like the focus highlight. */
-const misturarComBranco = (cor: Rgb, fraccao: number): Rgb =>
-  [cor[0] * fraccao + 255 * (1 - fraccao), cor[1] * fraccao + 255 * (1 - fraccao), cor[2] * fraccao + 255 * (1 - fraccao)] as const
-
-const fundo = rgb(token("--fundo"))
-const manchas = ["--aurora-azul", "--aurora-violeta", "--aurora-rosa", "--aurora-verde"].map(rgbaDe)
-const tintaDaColuna = rgbaDe("--painel-tinta")
-const tintaDaFaixa = rgbaDe("--painel-barra")
-
-/** The surfaces beneath what you read: the banner over each item, with and without the column. */
-const faixas: Record<string, Rgb> = {
-  "a faixa sobre o fundo": compor(fundo, tintaDaFaixa),
-  ...Object.fromEntries(
-    manchas.flatMap((mancha, i) => [
-      [`a faixa sobre a mancha ${i + 1}`, compor(compor(fundo, mancha), tintaDaFaixa)],
-      [`a faixa sobre a coluna e a mancha ${i + 1}`, compor(compor(compor(fundo, mancha), tintaDaColuna), tintaDaFaixa)],
-    ]),
-  ),
+/** `color-mix(in srgb, cor P%, --titulo)`, like the focus highlight. */
+const misturarComTitulo = (cor: Rgb, fraccao: number): Rgb => {
+  const t = rgb(token("--titulo"))
+  return [cor[0] * fraccao + t[0] * (1 - fraccao), cor[1] * fraccao + t[1] * (1 - fraccao), cor[2] * fraccao + t[2] * (1 - fraccao)] as const
 }
+
+/**
+ * The surface beneath what you read: the banner is solid since 1.4
+ * (`--painel-barra`, the popover colour), with no aurora under it. The light
+ * theme is measured in `styles/tokens.contraste.test.ts`.
+ */
+const faixas: Record<string, Rgb> = { "a faixa (--flutuante)": rgb(token("--flutuante")) }
 
 const rosa = rgb(token("--rosa"))
 /** The background of the focus: `color-mix(in srgb, var(--danger) 12%, transparent)` on top of the banner. */
@@ -91,10 +78,10 @@ describe("faixa da conta — as regras que estas contas supõem", () => {
     expect(faixa).not.toMatch(/border-radius|margin/)
   })
 
-  it("o calado é rosa sobre o rosa a 12 %, e o realce mistura 82 % com branco", () => {
+  it("o calado é rosa sobre o rosa a 12 %, e o realce mistura 82 % com a cor do título", () => {
     expect(regra(".me-audio-btn.off")).toMatch(/color:\s*var\(--danger\)/)
     expect(regra(".me-audio-btn.off")).toMatch(/color-mix\(in srgb, var\(--danger\) 12%, transparent\)/)
-    expect(regra(".me-audio-btn.off:hover")).toMatch(/color-mix\(in srgb, var\(--danger\) 82%, #fff\)/)
+    expect(regra(".me-audio-btn.off:hover")).toMatch(/color-mix\(in srgb, var\(--danger\) 82%, var\(--titulo\)\)/)
     expect(tokens).toMatch(/--danger:\s*var\(--rosa\)/)
   })
 
@@ -114,7 +101,7 @@ describe("faixa da conta — o contraste", () => {
   it.each(Object.keys(faixas))("o microfone calado passa 4,5:1 sobre %s, em repouso e com o rato", (onde) => {
     const faixa = faixas[onde]!
     expect(contrast(rosa, calado(faixa))).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(misturarComBranco(rosa, 0.82), calado(faixa))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(misturarComTitulo(rosa, 0.82), calado(faixa))).toBeGreaterThanOrEqual(4.5)
   })
 
   it.each([

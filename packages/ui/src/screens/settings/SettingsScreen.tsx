@@ -21,7 +21,7 @@ import { useToast } from "../../components/Toast.js"
 import { usePreferenciaDeLingua } from "../../hooks/useLingua.js"
 import { useCamaras } from "../../hooks/useCamaras.js"
 import { useMicrofones } from "../../hooks/useMicrofones.js"
-import { readPrefs, REGRAS_DE_PEDIDOS, usePrefs } from "../../hooks/usePrefs.js"
+import { readPrefs, REGRAS_DE_PEDIDOS, TEMAS, usePrefs } from "../../hooks/usePrefs.js"
 import { CopyIcon, SetaParaTrasIcon } from "../../icons.js"
 import { diagnosticsSnapshot, formatDiagnostics } from "../../lib/diagnostics.js"
 import { connectionLabel } from "../../lib/format.js"
@@ -484,6 +484,28 @@ export function SettingsScreen({
                 ))}
               </div>
               <p className="field-note">{strings.settings.languageNote}</p>
+            </section>
+
+            {/*
+              The colour theme. Like the language, a choice about this device:
+              it is not sent to the account. "System" follows the OS live
+              (`tokens.css`); the choice applies at once (`applyPrefs`).
+              */}
+            <section className="card settings-card">
+              <h2>{strings.settings.tema}</h2>
+              <div className="choice-row">
+                {TEMAS.map((tema) => (
+                  <button
+                    key={tema}
+                    className={prefs.tema === tema ? "chip on" : "chip"}
+                    aria-pressed={prefs.tema === tema}
+                    onClick={() => setPreferencia({ tema })}
+                  >
+                    {strings.settings.temas[tema]}
+                  </button>
+                ))}
+              </div>
+              <p className="field-note">{strings.settings.temaNota}</p>
             </section>
           </>
         )}

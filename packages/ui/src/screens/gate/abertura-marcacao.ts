@@ -30,6 +30,14 @@ export interface TextoNaLingua {
  *
  * With one text, it is character by character `renderToStaticMarkup(<Splash />)`. With several (the `index.html`, which is written before we know the language), each goes in a `<span lang>`, and the stylesheet that the plugin writes hides the ones that are not on the page. The `lingua-cedo.ts` marks the `<html lang>` before the browser reaches the `<body>`, so the first draw already comes out right.
  */
+/**
+ * The mark's side in px, written on the `<svg>` itself: half of `--abertura-lado`
+ * (`tokens.css`), which is the size the sheet gives it. It matters only before the
+ * sheet applies (the dev server paints the HTML first); `Splash.test.tsx` keeps
+ * the two equal.
+ */
+export const LADO_DA_MARCA = 56
+
 export function aberturaEmHtml(texto: string | readonly TextoNaLingua[]): string {
   const tarjas = MARCA_CHEIA.map((d) => `<path d="${escapar(d)}" style="--linha:${LINHA_DA_TARJA.get(d) ?? 0}"></path>`).join("")
   const dito =
@@ -40,7 +48,10 @@ export function aberturaEmHtml(texto: string | readonly TextoNaLingua[]): string
     '<div class="gate"><div class="abertura">' +
     '<div class="abertura-sinal" aria-hidden="true">' +
     '<span class="abertura-anel"></span>' +
-    `<svg class="abertura-marca" viewBox="0 0 24 24" fill="currentColor" focusable="false">${tarjas}</svg>` +
+    // The size in the markup, not only in the sheet: on the dev server the sheet
+    // arrives from JavaScript after the first paint, and an SVG with no size
+    // fills the window (seven black bars). The sheet's width wins once it loads.
+    `<svg class="abertura-marca" width="${LADO_DA_MARCA}" height="${LADO_DA_MARCA}" viewBox="0 0 24 24" fill="currentColor" focusable="false">${tarjas}</svg>` +
     "</div>" +
     `<p class="abertura-texto">${dito}</p>` +
     "</div></div>"

@@ -3,9 +3,9 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 /**
- * The three continuous animations with reduced motion: the background aurora,
- * the pulse of a voice room with people in it and the ring pulse of whoever is
- * on a call.
+ * The continuous animations with reduced motion: the pulse of a voice room
+ * with people in it and the ring pulse of whoever is on a call. (The
+ * background aurora was the third, until the flat skin removed it in 1.4.)
  *
  * The rule (Windows with animation effects off runs with reduced motion): nothing stops, it
  * just moves slower. Up to 1.3.7 all three stopped (`animation: none`, and on
@@ -48,17 +48,9 @@ describe("movimento reduzido: nada pára, anda mais devagar", () => {
     }
   })
 
-  it("a aurora anda ao triplo do tempo e a metade da distância, e no telemóvel continua parada", () => {
-    expect(fundo).toMatch(/@media \(prefers-reduced-motion: reduce\) and \(min-width: 601px\)\s*\{\s*body::before\s*\{\s*animation:\s*aurora-calma 72s ease-in-out infinite alternate !important/)
-    expect(ler("./tokens.css")).toMatch(/--aurora-volta:\s*24s/)
-    const normal = fotogramas(fundo, "aurora")
-    const calma = fotogramas(fundo, "aurora-calma")
-    soCompositor(calma)
-    expect(calma).toContain("translate(-1.5%, 2%) scale(1.025)")
-    expect(calma).toContain("translate(2%, -1%) scale(1.04)")
-    expect(normal).toContain("translate(-3%, 4%) scale(1.05)")
-    expect(normal).toContain("translate(4%, -2%) scale(1.08)")
-    expect(fundo).toMatch(/max-width:\s*600px\)\s*\{\s*body::before\s*\{\s*animation:\s*none/)
+  it("o fundo já não anima: a aurora saiu com a pele plana (1.4)", () => {
+    expect(fundo).not.toMatch(/@keyframes|animation/)
+    expect(fundo).not.toMatch(/body::before/)
   })
 
   it("a sala de voz com gente pulsa ao dobro do tempo, e a opacidade desce menos", () => {

@@ -3,6 +3,7 @@ import type { Activity } from "../bridge.js"
 import { ATALHOS_POR_OMISSAO, lerMapaDeAtalhos, type MapaDeAtalhos } from "../lib/atalhosDeVoz.js"
 import { alternarSilencio, lerSilenciados } from "../lib/silenciados.js"
 import { temAnfitriaoDeAvisos } from "../lib/notifications.js"
+import { PREFS_KEY, TEMA_POR_OMISSAO, temaValido, type Tema } from "../tema-cedo.js"
 
 /**
  * Appearance preferences, persisted locally.
@@ -16,7 +17,7 @@ import { temAnfitriaoDeAvisos } from "../lib/notifications.js"
  * See `lib/preferenciasDaConta.ts`, which also documents what stays here only.
  */
 
-export const PREFS_KEY = "enclave.prefs"
+export { PREFS_KEY }
 
 /**
  * Tells the page that preferences changed in this same tab.
@@ -51,12 +52,18 @@ export const ACCENTS = [
 
 export type Density = "confortavel" | "compacta"
 
+// The theme type and its tolerant read live in `tema-cedo.ts`, which imports
+// nothing so the web can run it before the first frame. See `Tema` there.
+export { aplicarTemaCedo, TEMAS, type Tema } from "../tema-cedo.js"
+
 export interface Prefs {
   /** The activity chosen for this device. Read before the first connect, so
    * an invisible account never flashes online on reload. */
   activity: Activity
   accent: number
   density: Density
+  /** The colour theme of this device. See `Tema`. */
+  tema: Tema
   /**
    * System alerts. ON by default (the requirement:
    * "notifications on by default at 100 percent"). On the browser they only
@@ -337,6 +344,7 @@ export const DEFAULT_PREFS: Prefs = {
    * changing the default never touches anyone who already picked a colour,    * only fresh installs. */
   accent: 4,
   density: "confortavel",
+  tema: TEMA_POR_OMISSAO,
   notifications: true,
   avisosDaAppRevistos: false,
   notifyPreview: true,
@@ -495,6 +503,7 @@ export function readPrefs(storage: Pick<Storage, "getItem"> = localStorage): Pre
       activity,
       accent,
       density,
+      tema: temaValido(parsed?.tema),
       // On by factory default; on the desktop app, on once after review
       // (see `avisosDaAppRevistos`). After that, only an explicit `false` turns them off.
       notifications:
@@ -658,10 +667,11 @@ export function writePrefs(prefs: Prefs, storage: Pick<Storage, "setItem"> = loc
  * screen. The argument stays the whole object so the caller does not change.
  */
 export function applyPrefs(prefs: Prefs): void {
-  const origem = ACCENTS[DEFAULT_PREFS.accent] ?? ACCENTS[0]
-  document.documentElement.style.setProperty("--acento", origem.accent)
-  document.documentElement.style.setProperty("--accent", origem.accent)
-  document.documentElement.style.setProperty("--accent-deep", origem.deep)
+  // The brand colours live in `tokens.css`, per theme. Until 1.4 this wrote the
+  // cyan accent inline on the root, which would beat the light theme block:
+  // clear it, for a page that still carries it from before.
+  for (const nome of ["--acento", "--accent", "--accent-deep"]) document.documentElement.style.removeProperty(nome)
+  document.documentElement.dataset.theme = prefs.tema
   document.documentElement.dataset.density = DEFAULT_PREFS.density
   // The mirror of the camera itself is CSS (`[data-espelho]` in `screens.css`):
   // only the screen of the person viewing themselves changes, and the video that
@@ -685,6 +695,7 @@ export type PreferenciaDaFase4 =
   | "mostrarOnline"
   | "overlayDeJogoLigada"
   | "opacidadeDaOverlay"
+  | "tema"
 
 export function usePrefs(): {
   prefs: Prefs

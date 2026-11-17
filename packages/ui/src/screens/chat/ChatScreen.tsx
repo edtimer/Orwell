@@ -22,6 +22,7 @@ import type { CargoDoMembro } from "../../lib/agruparMembros.js"
 import { connectionLabel, isDirect, serverOf } from "../../lib/format.js"
 import { strings, traduzirErro } from "../../strings.js"
 import { RoomIcon } from "../../components/RoomIcon.js"
+import { RoomGlyph } from "../../components/SidebarIcons.js"
 import { SeloOficial } from "../../components/SeloOficial.js"
 import { Vozes } from "../../components/Vozes.js"
 import type { AvisoDaChamada, CaminhoDeMedia } from "../../lib/estadoDaChamada.js"
@@ -644,6 +645,20 @@ export function ChatScreen({
   const ehDirecta = active !== null && isDirect(active)
 
   /**
+   * The open room, for the header: its name and its kind (for the glyph), and
+   * the channel's topic. Optional calls: a host (or a test bridge) without
+   * rooms or meta draws the header the old way, with the channel's name.
+   * A room this version cannot find by id still has a name (`nomeDaSala`),
+   * and reads as a text room, like `RoomGlyph` reads an unknown layout.
+   */
+  const salaNoTopo: { nome: string; kind: "text" | "voice"; layout?: string | undefined } | null = (() => {
+    if (active === null || ehDirecta || !nomeDaSala) return null
+    const sala = bridge.channels.rooms?.(active)?.find((candidata) => candidata.room === activeRoom)
+    return { nome: sala?.name ?? nomeDaSala(activeRoom), kind: sala?.kind ?? "text", layout: sala?.layout }
+  })()
+  const topicoNoTopo = salaNoTopo && active !== null ? bridge.channels.meta?.(active)?.topic?.trim() || null : null
+
+  /**
    * The call for this channel, and how it displays. See `vistaDaChamada`.
    *
    * In the voice room, "Room conversation" opens its conversation below the
@@ -739,16 +754,36 @@ export function ChatScreen({
             {/* A direct conversation is people, and the form says so: a round marker
                 instead of the `@` borrowed from here before. Same rule as the
                 sidebar, so the top and the list speak the same language. */}
-            <RoomIcon
-              channel={active}
-              label={labelFor(active)}
-              size={26}
-              icon={iconFor?.(active)}
-              round={isDirect(active)}
-              official={oficial}
-            />
-            <h1>{labelFor(active)}</h1>
-            {oficial && <SeloOficial />}
+            {/* Where you are, the way a Discord user looks for it: in a
+                community, the open room (glyph and name) is the heading, and
+                the community and its topic follow quietly on the same line. A
+                direct conversation is a person: their face and name. */}
+            {salaNoTopo ? (
+              <>
+                <span className="topbar-glifo" aria-hidden="true">
+                  <RoomGlyph kind={salaNoTopo.kind} layout={salaNoTopo.layout} size={20} />
+                </span>
+                <h1>{salaNoTopo.nome}</h1>
+                {oficial && <SeloOficial />}
+                <span className="topbar-contexto" title={topicoNoTopo ? `${labelFor(active)} · ${topicoNoTopo}` : labelFor(active)}>
+                  <span className="topbar-comunidade">{labelFor(active)}</span>
+                  {topicoNoTopo && <span className="topbar-topico">{topicoNoTopo}</span>}
+                </span>
+              </>
+            ) : (
+              <>
+                <RoomIcon
+                  channel={active}
+                  label={labelFor(active)}
+                  size={26}
+                  icon={iconFor?.(active)}
+                  round={isDirect(active)}
+                  official={oficial}
+                />
+                <h1>{labelFor(active)}</h1>
+                {oficial && <SeloOficial />}
+              </>
+            )}
             {/* Wide screen: the history progress lives here, beside the name. */}
             {ecraLargo && <BarraDoHistorico estado={historicoDosIrmaos} noTopo />}
             {/* The lock and "Open" left the header
@@ -1398,8 +1433,10 @@ export function ChatScreen({
         />
       )}
 
-      {/* A quiet line of connection state, nothing more: errors go to toasts. */}
-      <footer className="statusbar">{connectionLabel(connection)}</footer>
+      {/* A quiet line of connection state, only when there is something to say:
+          "connected" under every conversation was noise. Errors go to toasts,
+          and the banner above the conversation carries the outages. */}
+      {connection !== "online" && <footer className="statusbar">{connectionLabel(connection)}</footer>}
     </main>
   )
 }

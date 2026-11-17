@@ -53,7 +53,7 @@ describe("os emojis com fonte nossa", () => {
     expect(pilha.indexOf('"Orwell Emoji"')).toBeGreaterThan(-1)
     expect(pilha.indexOf('"Orwell Emoji"')).toBeLessThan(pilha.indexOf("system-ui"))
     // The text font first: plain digits and letters never reach the emoji font.
-    expect(pilha.indexOf('"Space Grotesk"')).toBe(0)
+    expect(pilha.indexOf('"Inter Variable"')).toBe(0)
     expect(ecras).toMatch(/\.emoji-panel,\s*\.reaccao,\s*\.message-body,\s*\.chat-composer\s*\{\s*font-family:\s*var\(--fonte-com-emoji\);/)
   })
 

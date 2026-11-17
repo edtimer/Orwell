@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { renderToStaticMarkup } from "react-dom/server"
 import { MARCA_CHEIA } from "../../marca.gen.js"
 import { strings } from "../../strings.js"
-import { aberturaEmHtml, folhaDasLinguas } from "./abertura-marcacao.js"
+import { aberturaEmHtml, folhaDasLinguas, LADO_DA_MARCA } from "./abertura-marcacao.js"
 import { esquecerAbertura } from "./abertura-viva.js"
 import { SAIDA_DE_EMERGENCIA_MS, Splash } from "./Splash.js"
 
@@ -77,6 +77,20 @@ describe("o splash", () => {
     expect(renderToStaticMarkup(<Splash />)).toBe(aberturaEmHtml(strings.gate.splashBody))
   })
 
+  /*
+    On the dev server the sheet arrives from JavaScript after the first paint, and
+    an `<svg>` with no size filled the window with the mark in black for a
+    quarter of a second. The size goes in the markup; the sheet's wins after.
+  */
+  it("a marca traz o tamanho na própria marcação, igual ao que a folha lhe dá", () => {
+    expect(aberturaEmHtml("x")).toContain(`<svg class="abertura-marca" width="${LADO_DA_MARCA}" height="${LADO_DA_MARCA}"`)
+    const meu = expect.getState().testPath
+    if (!meu) throw new Error("sem caminho do teste")
+    const tokens = readFileSync(join(dirname(meu), "..", "..", "styles", "tokens.css"), "utf8")
+    const lado = Number(/--abertura-lado:\s*(\d+)px/.exec(tokens)?.[1])
+    expect(LADO_DA_MARCA).toBe(lado / 2)
+  })
+
   it("no index.html o texto vai em todas as línguas, e a folha mostra só o da página", () => {
     const html = aberturaEmHtml([
       { lingua: "pt", texto: "A abrir…" },
@@ -96,14 +110,15 @@ describe("a abertura: o anel na folha (dono, 28 de Outubro de 2026)", () => {
     return readFileSync(join(dirname(meu), "..", "..", "styles", "pele.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "")
   }
 
-  it("as quatro cores esbatem uma na outra, e a última volta à primeira", () => {
+  it("um arco só, na cor da marca, que se esbate até nada na cauda, sem brilho (1.4)", () => {
+    // Until 1.4 the arc was four colours blending (cyan, indigo, pink, green),
+    // with a glow; the flat skin keeps one colour.
     const anel = pele().match(/\.abertura-anel::after \{([\s\S]*?)\n\}/)?.[1] ?? ""
     const gradiente = anel.match(/conic-gradient\(([\s\S]*?)\);/)?.[1] ?? ""
-    expect(gradiente).not.toBe("")
-    // No edges: a color with two angles ("0deg 90deg") is a solid quarter.
-    expect(gradiente).not.toMatch(/\d+deg\s+\d+deg/)
-    const cores = [...gradiente.matchAll(/var\((--[a-z]+)\)/g)].map((m) => m[1])
-    expect(cores).toEqual(["--acento", "--indigo", "--rosa", "--presenca", "--acento"])
+    expect(gradiente).toMatch(/^from 0deg, transparent 0deg/)
+    const cores = [...new Set([...gradiente.matchAll(/var\((--[a-z-]+)\)/g)].map((m) => m[1]))]
+    expect(cores).toEqual(["--acento"])
+    expect(anel).not.toMatch(/drop-shadow/)
   })
 
   it("a volta tem velocidades: vários troços, cada um com a sua curva, e só transform", () => {

@@ -155,6 +155,12 @@ function componentesForaDoRegisto(raiz) {
       texto: MIT("Copyright (c) 2016 Cosmo Wolfe"),
     },
     {
+      titulo: "Inter (font, variable, @fontsource-variable/inter 5.3.0)",
+      licenca: "OFL-1.1",
+      onde: "web, desktop app",
+      texto: fonte("OFL-Inter.txt"),
+    },
+    {
       titulo: "Space Grotesk (font)",
       licenca: "OFL-1.1",
       onde: "web, desktop app, site",

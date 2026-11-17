@@ -1517,6 +1517,9 @@ export const en: Traducao = {
     language: "Language",
     languageNote:
       "Changes the language of the app. Messages are not translated.",
+    tema: "Theme",
+    temas: { escuro: "Dark", claro: "Light", sistema: "System" },
+    temaNota: "System follows your device's theme. Only changes this device.",
     account: "Account",
     editProfile: "Edit profile",
     notifications: "Notifications",

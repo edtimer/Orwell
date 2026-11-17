@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { act, cleanup, renderHook } from "@testing-library/react"
 import { ATALHOS_POR_OMISSAO } from "../lib/atalhosDeVoz.js"
 import {
-  ACCENTS,
+  aplicarTemaCedo,
   DEFAULT_PREFS,
   EMOJI_RECENTS_MAX,
   PREFS_KEY,
@@ -87,6 +87,7 @@ describe("readPrefs / writePrefs", () => {
       sensibilidadeAutomatica: false,
       limiarDoMicrofone: -37,
       pushFechada: true,
+      tema: "claro" as const,
     }
     writePrefs(chosen)
     expect(localStorage.getItem(PREFS_KEY)).toBeTruthy()
@@ -326,81 +327,60 @@ describe("applyPrefs", () => {
       musicasCaladas: [],
       silenciados: [],
     })
-    expect(document.documentElement.style.getPropertyValue("--accent")).toBe(ACCENTS[DEFAULT_PREFS.accent]?.accent)
-    expect(document.documentElement.style.getPropertyValue("--accent")).toBe("#8be9fd")
-    expect(document.documentElement.style.getPropertyValue("--accent-deep")).toBe(ACCENTS[DEFAULT_PREFS.accent]?.deep)
+    // The brand colours live in `tokens.css`, per theme: nothing inline on the
+    // root, which would beat the light theme block.
+    expect(document.documentElement.style.getPropertyValue("--accent")).toBe("")
+    expect(document.documentElement.style.getPropertyValue("--accent-deep")).toBe("")
+    expect(document.documentElement.style.getPropertyValue("--acento")).toBe("")
     expect(document.documentElement.dataset.density).toBe("confortavel")
+    expect(document.documentElement.dataset.theme).toBe("escuro")
+  })
+
+  it("limpa o acento que uma versão antiga deixou escrito na raiz", () => {
+    document.documentElement.style.setProperty("--accent", "#8be9fd")
+    document.documentElement.style.setProperty("--acento", "#8be9fd")
+    applyPrefs(DEFAULT_PREFS)
+    expect(document.documentElement.style.getPropertyValue("--accent")).toBe("")
+    expect(document.documentElement.style.getPropertyValue("--acento")).toBe("")
+  })
+
+  it("o tema escolhido vai para o `data-theme` da raiz", () => {
+    applyPrefs({ ...DEFAULT_PREFS, tema: "claro" })
+    expect(document.documentElement.dataset.theme).toBe("claro")
+    applyPrefs({ ...DEFAULT_PREFS, tema: "sistema" })
+    expect(document.documentElement.dataset.theme).toBe("sistema")
   })
 })
 
-/* --------------------------------------------------------------- contraste */
-
-/** WCAG relative luminance of a #rrggbb colour. */
-function luminance(hex: string): number {
-  const linear = (channel: number): number => {
-    const c = channel / 255
-    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
-  }
-  const value = Number.parseInt(hex.slice(1), 16)
-  return (
-    0.2126 * linear((value >> 16) & 255) + 0.7152 * linear((value >> 8) & 255) + 0.0722 * linear(value & 255)
-  )
-}
-
-function contrast(a: string, b: string): number {
-  const first = luminance(a)
-  const second = luminance(b)
-  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05)
-}
-
-/** tokens.css `--tinta`, which is `--on-accent`. If it changes there, it changes here. */
-const ON_ACCENT = "#080c1a"
-
-/**
- * The solid surfaces in `tokens.css` where accented text can land, and the
- * composite glass over the background. If they change there, they must change here.
- */
-const SUPERFICIES = {
-  "--fundo": "#080c1a",
-  "--vidro-solido": "#0c1123",
-  "--bg-main": "#0b1020",
-  "--bg-raised": "#131a33",
-  "--bg-hover": "#192241",
-}
-
-describe("contraste dos acentos na pele midnight", () => {
-  // Accent fill is the accent itself, with dark ink on top (chips, badges,
-  // primary buttons, avatars).
-  it.each(ACCENTS.map((option) => [option.name, option] as const))(
-    "%s: a tinta passa AA sobre o preenchimento",
-    (_name, option) => {
-      expect(option.deep).toBe(option.accent)
-      expect(contrast(ON_ACCENT, option.deep)).toBeGreaterThanOrEqual(4.5)
-    },
-  )
-
-  // And accent is small text in many places: links, counts, labels.
-  it.each(ACCENTS.map((option) => [option.name, option] as const))(
-    "%s: como texto pequeno, passa AA sobre todas as superfícies",
-    (_name, option) => {
-      for (const fundo of Object.values(SUPERFICIES)) {
-        expect(contrast(option.accent, fundo)).toBeGreaterThanOrEqual(4.5)
-      }
-    },
-  )
-
-  it("os textos da pele passam AA sobre todas as superfícies", () => {
-    for (const texto of ["#e6ecff", "#f1f4ff", "#b9c3e0", "#9aa6c8", "#8591b8"]) {
-      for (const fundo of Object.values(SUPERFICIES)) {
-        expect(contrast(texto, fundo)).toBeGreaterThanOrEqual(4.5)
-      }
-    }
+describe("o tema", () => {
+  it("vem escuro de fábrica, e lixo lê-se como escuro", () => {
+    expect(DEFAULT_PREFS.tema).toBe("escuro")
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ tema: "roxo" }))
+    expect(readPrefs().tema).toBe("escuro")
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ tema: "sistema" }))
+    expect(readPrefs().tema).toBe("sistema")
   })
 
-  it("o ciano é a cor por omissão, no lugar do antigo Lilás", () => {
-    expect(ACCENTS[DEFAULT_PREFS.accent]?.accent).toBe("#8be9fd")
+  it("aplica-se antes do primeiro frame, a partir do disco, e nunca rebenta", () => {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ tema: "claro" }))
+    aplicarTemaCedo()
+    expect(document.documentElement.dataset.theme).toBe("claro")
+    aplicarTemaCedo({ getItem: () => "{estragado" })
+    expect(document.documentElement.dataset.theme).toBe("escuro")
+    aplicarTemaCedo({
+      getItem: () => {
+        throw new Error("bloqueado")
+      },
+    })
+    expect(document.documentElement.dataset.theme).toBe("escuro")
   })
 })
+
+/*
+  The contrast of the theme colours is measured against `tokens.css` itself,
+  in both themes, in `styles/tokens.contraste.test.ts`. The five `ACCENTS` no
+  longer drive the screen (0.9); they stay only so a stored index still reads.
+*/
 
 describe("migração do marcador de escolha", () => {
   it("prefs antigos sem marcador e accent no default velho recebem o default novo", () => {

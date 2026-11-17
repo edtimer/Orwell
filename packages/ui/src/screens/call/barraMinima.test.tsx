@@ -24,7 +24,6 @@ vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined)
 const ler = (relativo: string): string => readFileSync(fileURLToPath(new URL(relativo, import.meta.url)), "utf8")
 const semComentarios = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, "")
 const tokens = semComentarios(ler("../../styles/tokens.css"))
-const fundoCss = semComentarios(ler("../../styles/fundo.css"))
 const ecras = semComentarios(ler("../../styles/screens.css"))
 
 function token(nome: string): string {
@@ -54,46 +53,19 @@ function contrast(a: Rgb, b: Rgb): number {
   return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05)
 }
 
-/** An `rgba` layer on top of a solid color. */
-const compor = (base: Rgb, [r, g, b, a]: readonly [number, number, number, number]): Rgb =>
-  [base[0] + (r - base[0]) * a, base[1] + (g - base[1]) * a, base[2] + (b - base[2]) * a] as const
-
-/** The layers of the background gradients, read from `fundo.css`. */
-const gradientes = [...fundoCss.matchAll(/radial-gradient\([^)]*rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/g)].map(
-  (m) => [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])] as const,
-)
-
-const fundo = rgb(token("--fundo"))
-/** The worst case: both gradients at their max, one on top of the other. */
-const fundoMaisClaro = gradientes.reduce(compor, fundo)
-/** An `rgba(r, g, b, a)` token from `tokens.css`. */
-function rgbaDe(nome: string): readonly [number, number, number, number] {
-  const m = new RegExp(`${nome}:\\s*rgba\\((\\d+),\\s*(\\d+),\\s*(\\d+),\\s*([\\d.]+)\\)`).exec(tokens)
-  if (!m) throw new Error(`falta ${nome} em tokens.css`)
-  return [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])] as const
-}
-
 /**
- * The minimal bar is a pill on top of the aurora (`paineis.css`), no filter. The
- * worst case: each patch of the aurora at its max, without its blur bringing it
- * down, and the bar ink on top.
+ * The minimal bar is a solid float (`--painel-barra`, the popover colour) over
+ * the call stage. Since 1.4 there is no aurora or gradient under it: the
+ * surfaces are what they say. The light theme is measured in
+ * `styles/tokens.contraste.test.ts`.
  */
-const manchas = ["--aurora-azul", "--aurora-violeta", "--aurora-rosa", "--aurora-verde"].map(rgbaDe)
-const tintaDaBarra = rgbaDe("--painel-barra")
-const sobAurora = Object.fromEntries(
-  manchas.map((mancha, i) => [`a mancha ${i + 1} da aurora, sob a tinta da barra`, compor(compor(fundo, mancha), tintaDaBarra)]),
+const superficies: Record<string, Rgb> = Object.fromEntries(
+  ["--fundo", "--vidro-solido", "--bg-main", "--flutuante"].map((nome) => [nome, rgb(token(nome))]),
 )
-
-const superficies: Record<string, Rgb> = {
-  "--fundo": fundo,
-  "--vidro-solido": rgb(token("--vidro-solido")),
-  "o fundo no ponto mais claro dos gradientes": fundoMaisClaro,
-  ...sobAurora,
-}
 
 describe('barra "Mínima" — o contraste dos estados', () => {
-  it("os gradientes do fundo foram lidos (sem eles, o pior caso não é o pior)", () => {
-    expect(gradientes.length).toBe(2)
+  it("a barra é o flutuante, sólido", () => {
+    expect(tokens).toMatch(/--painel-barra:\s*var\(--flutuante\)/)
   })
 
   it("desligado e neutro usam a cor discreta, que é a mais fraca da barra", () => {

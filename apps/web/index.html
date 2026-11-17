@@ -63,7 +63,7 @@
       content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; worker-src 'self' blob:; frame-src 'none'; connect-src 'self' ws://localhost:* ws://127.0.0.1:* wss://orwell.pt; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
     />
     <meta name="referrer" content="no-referrer" />
-    <meta name="theme-color" content="#080c1a" />
+    <meta name="theme-color" content="#17181b" />
     <!--
       A file, not the data-URI that was here before.
       
@@ -111,7 +111,18 @@ hand.
     <style>
       html,
       body {
-        background: #080c1a;
+        background: #17181b;
+      }
+      /* The light theme, set on <html> by the head script before <body>. */
+      html[data-theme="claro"],
+      html[data-theme="claro"] body {
+        background: #e3e5e8;
+      }
+      @media (prefers-color-scheme: light) {
+        html[data-theme="sistema"],
+        html[data-theme="sistema"] body {
+          background: #e3e5e8;
+        }
       }
     </style>
   </head>

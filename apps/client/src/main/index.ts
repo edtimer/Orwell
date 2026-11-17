@@ -391,7 +391,7 @@ function abrirEcraDeArranque(): { janela: BrowserWindow; mostrar: (estado: Estad
     fullscreenable: false,
     center: true,
     show: false,
-    backgroundColor: "#080c1a",
+    backgroundColor: "#17181b",
     webPreferences: {
       // Our page and script-free, and even so everything is locked down: the same hardening as the main window.
       contextIsolation: true,
@@ -445,7 +445,7 @@ function createWindow(): BrowserWindow {
     height: 800,
     minWidth: 940,
     minHeight: 560,
-    backgroundColor: "#080c1a",
+    backgroundColor: "#17181b",
     show: false,
     webPreferences: {
       preload: asset("preload", "index.cjs"),

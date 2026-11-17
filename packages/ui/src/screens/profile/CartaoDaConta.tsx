@@ -401,6 +401,10 @@ export function CartaoDaConta({
               className={micCalado ? "me-audio-btn off" : "me-audio-btn"}
               aria-label={strings.call.micAria(micCalado)}
               data-tip={soundOff && !micMuted ? strings.call.micBySound : micMuted ? strings.call.micOn : strings.call.micOff}
+              /* The first button sits at the column's left edge: centred, its
+                 tooltip ran past the edge and was cut off. It grows into the
+                 column, the mirror of the gear's `end`. */
+              data-tip-side="start"
               onClick={onToggleMic}
               /* The menu, by right-click or by menu key (the browser sends the same
                  `contextmenu` to the focused button), and with a finger held

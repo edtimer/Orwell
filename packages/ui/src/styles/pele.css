@@ -1,17 +1,17 @@
 /* ------------------------------------------------------------------- pele */
 
 /*
-  The "Tokyo Rain, midnight" skin: the layout of the approved boards.
+  The flat skin: the form of the app, the way a Discord user knows it.
 
-  `tokens.css` gives the colors; this sheet gives the form: glass panels with
-  14px corners and 12px gap between them, the rail without background, sidebar
-  lines rounded, messages in glass balloons, the input bar in a capsule, and
-  buttons from the design (primary in gradient, hang up in pink).
+  `tokens.css` gives the colors (two themes); `paineis.css` paints the
+  surfaces; this sheet gives the form: columns that meet edge to edge, the
+  icon rail with a pill and squircles, solid buttons with no gradient or glow,
+  and quiet wells for fields.
 
-  It comes after the screen sheets and before `movel.css`: it beats them by
-  coming later, and leaves the phone the final say. The layout rules (gaps,
-  columns) only apply on wide screens, above 840px, where the sidebar is a
-  column and not a drawer.
+  It replaced the "Tokyo Rain" glass skin in 1.4. It comes after the screen
+  sheets and before `movel.css`: it beats them by coming later, and leaves the
+  phone the final say. The layout rules (gaps, columns) only apply on wide
+  screens, above 840px, where the sidebar is a column and not a drawer.
 
   No color is written by hand here: everything comes from `tokens.css`.
 */
@@ -19,10 +19,11 @@
 body {
   font-family: var(--fonte);
   color: var(--text);
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 34%, transparent);
+  background: color-mix(in srgb, var(--accent-deep) 36%, transparent);
   color: var(--titulo);
 }
 
@@ -30,65 +31,104 @@ h1,
 h2,
 h3 {
   color: var(--titulo);
+  letter-spacing: -0.01em;
 }
 
-/* ------------------------------------------------------------- the glass */
-
-/*
-  The color of panels, cards, sheets, and menus is all in `paineis.css`,
-  which comes after this sheet. This file only has the form.
-*/
-
-/* The uppercase spaced labels, like "text", "voice", and "members". */
+/* The small uppercase labels, like "text", "voice", and "members". */
 .members-header,
 .category-name,
 .settings-nav-title {
   font-size: var(--font-xs);
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--discreto);
 }
 
 /* -------------------------------------------------------------- the rail */
 
-.rail {
-  background: transparent;
-}
-
+/*
+  Circles that become squircles: on hover and when open, the button rounds to
+  16px and fills with the brand, and the pill on the left grows (short on
+  hover, tall when open). The pill is the base sheet's `::before`.
+*/
 .rail-btn {
-  border-radius: var(--radius-lg);
-  background: var(--vidro);
-  border: 1px solid var(--vidro-contorno);
-  color: var(--apagado);
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-main);
+  color: var(--secundario);
 }
 
 .rail-btn:hover {
-  background: var(--bg-hover);
-  color: var(--titulo);
-  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  border-radius: 16px;
+  background: var(--accent-deep);
+  color: var(--on-accent);
 }
 
-/* The open target: outline and icon in the accent color, no fill. */
 .rail-btn.active {
-  background: var(--vidro);
-  color: var(--accent);
-  border-color: var(--accent);
+  border-radius: 16px;
+  background: var(--accent-deep);
+  color: var(--on-accent);
 }
 
-.rail-btn::before {
-  display: none;
+/*
+  The pill. On a rail button `::before` is ALSO the tooltip's arrow
+  (`[data-tip]::before` in `components.css`), which brings a 135° rotation, a
+  border, a fade and a 300 ms delay: left alone, the pill came out as a tilted
+  line beside the button. `[data-tip]` here matches that rule's weight and wins
+  by coming later, resetting every arrow property, so on the rail `::before`
+  is only the pill; the tooltip keeps its bubble (`::after`) and loses the
+  arrow, which it does not need beside a button.
+*/
+.rail-btn::before,
+.rail-btn[data-tip]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  bottom: auto;
+  left: -12px;
+  width: 4px;
+  height: 0;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  background: var(--titulo);
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+  translate: 0 -50%;
+  z-index: auto;
+  transition: height var(--dur) var(--ease);
+  transition-delay: 0ms;
 }
 
-/* -------------------------------------------------------- a barra lateral */
+.rail-btn:hover::before,
+.rail-btn[data-tip]:hover::before,
+.rail-btn[data-tip]:focus-visible::before {
+  height: 20px;
+  opacity: 1;
+  transition-delay: 0ms;
+}
+
+.rail-btn.active::before,
+.rail-btn.active[data-tip]::before,
+.rail-btn.active[data-tip]:hover::before {
+  height: 40px;
+}
+
+.rail-logo {
+  color: var(--titulo);
+}
+
+/* -------------------------------------------------------- the sidebar */
 
 .sidebar-header {
   height: auto;
-  min-height: 46px;
+  min-height: 48px;
   padding-top: var(--space-4);
   padding-bottom: var(--space-3);
-  border-bottom-color: var(--vidro-contorno);
+  border-bottom-color: var(--line);
   color: var(--titulo);
+  box-shadow: 0 1px 0 rgb(var(--sombra-cor) / calc(0.12 * var(--sombra-forca)));
 }
 
 .sidebar-titulo {
@@ -100,12 +140,17 @@ h3 {
 
 .channel-row,
 .room-row {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
+}
+
+.channel-row:hover,
+.room-row:hover {
+  background: color-mix(in srgb, var(--bg-hover) 60%, transparent);
 }
 
 .channel-row.current,
 .room-row.current {
-  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  background: var(--bg-hover);
 }
 
 .channel-row.current::before {
@@ -114,6 +159,11 @@ h3 {
 
 .channel,
 .room {
+  color: var(--apagado);
+}
+
+.channel-row:hover .channel,
+.room-row:hover .room {
   color: var(--secundario);
 }
 
@@ -124,121 +174,323 @@ h3 {
 
 /* --------------------------------------------------------------- a conversa */
 
+/*
+  The header says where you are, the way a Discord user looks for it: the
+  room's glyph and name (the heading), a divider, then the community and its
+  topic, quiet, on one line that ellipsizes before anything wraps. The buttons
+  on the right are plain icons that light up under the cursor.
+*/
 .topbar {
+  color: var(--titulo);
+}
+
+.topbar h1 {
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  font-size: var(--font-md);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-glifo {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  color: var(--discreto);
+}
+
+.topbar-contexto {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--apagado);
+  font-size: var(--font-sm);
+  white-space: nowrap;
+}
+
+.topbar-contexto::before {
+  content: "";
+  flex: none;
+  width: 1px;
+  height: 20px;
+  margin-inline: var(--space-1);
+  background: var(--line-forte);
+}
+
+.topbar-comunidade {
+  flex: none;
+  color: var(--secundario);
+  font-weight: 500;
+}
+
+.topbar-topico {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-topico::before {
+  content: "·";
+  margin-inline-end: var(--space-3);
+  color: var(--discreto);
+}
+
+/* On a narrow screen the line is the room name and the buttons. */
+@media (max-width: 840px) {
+  .topbar-contexto {
+    display: none;
+  }
+}
+
+.topbar .action {
+  border-color: transparent;
+  background: transparent;
+  color: var(--apagado);
+}
+
+.topbar .action:hover {
+  border-color: transparent;
+  background: var(--bg-hover);
   color: var(--titulo);
 }
 
 .timeline-divider::before,
 .timeline-divider::after {
-  border-top-color: var(--vidro-contorno);
+  border-top-color: var(--line);
 }
 
-/* Each message in a glass balloon, with the top corner touching the speaker. */
+/*
+  Messages are rows, not balloons (1.4): the face in a 40px gutter, the name
+  and time on top, the text below at full width. A run of messages from the
+  same person keeps one face, and its later lines show their time in the
+  gutter only under the cursor. The whole row lights faintly under the cursor,
+  edge to edge: each row reaches into the timeline's own side padding and
+  pads the same amount back, so faces and text stay in one column. A new
+  speaker gets air above.
+*/
+.message {
+  gap: var(--space-5);
+  margin-inline: calc(-1 * var(--space-5));
+  padding: 2px var(--space-5);
+  border-radius: 0;
+}
+
+.message:not(.grouped) {
+  margin-top: var(--space-4);
+  padding-top: var(--space-2);
+}
+
 .message:hover {
-  background: transparent;
+  background: color-mix(in srgb, var(--bg-hover) 50%, transparent);
+}
+
+.message .avatar-wrap > .message-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.message-gutter {
+  width: 40px;
+  padding-top: 4px;
+  color: var(--discreto);
+  font-size: 11px;
+  text-align: center;
 }
 
 .message .message-body {
+  flex: 1 1 auto;
   min-width: 0;
-  /* The balloon is the size of what it holds, not the column: "ok" is a small
-     balloon, a paragraph is a wide balloon, an image is the image. This holds
-     for rooms and direct messages. */
-  width: fit-content;
-  max-width: min(640px, 100%);
-  padding: var(--space-3) 14px;
-  border: 1px solid var(--vidro-contorno);
-  border-radius: var(--radius-lg);
-  border-top-left-radius: var(--radius-sm);
-  background: var(--vidro);
-  line-height: 1.55;
-  transition: border-color var(--dur-fast) var(--ease);
+  width: auto;
+  max-width: none;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  line-height: 1.45;
 }
 
-.message:hover .message-body {
-  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
-.message.grouped .message-body {
-  border-top-left-radius: var(--radius-lg);
+.message-body header {
+  gap: var(--space-3);
+  margin-bottom: 2px;
 }
 
 .message .author {
   color: var(--titulo);
+  font-size: var(--font-md);
+  font-weight: 600;
 }
 
-/* The input bar in a glass capsule. */
+.message-body time {
+  color: var(--discreto);
+  font-size: 11px;
+}
+
+.message-body p {
+  color: var(--texto);
+  font-size: var(--font-md);
+  line-height: 1.45;
+}
+
+/* The hover actions: a small float at the row's top right. */
+.msg-actions {
+  top: -16px;
+  right: var(--space-5);
+  padding: 2px;
+  border-color: var(--line);
+  background: var(--flutuante);
+  box-shadow: var(--sombra-1);
+}
+
+.msg-actions button {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+}
+
+/*
+  The input bar: one raised well. The "+" sits inside on the left, the emoji
+  and send on the right, all borderless icons; Enter sends. The send icon is
+  quiet and turns brand-coloured when there is something to send. On the phone
+  the screen sheet keeps its own sizes (44px targets) and the filled send.
+*/
 .chat-composer .composer-line {
-  padding: var(--space-3) 10px;
-  border: 1px solid var(--vidro-contorno);
-  border-radius: 16px;
-  background: var(--vidro);
+  align-items: center;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
 }
 
 .chat-composer .composer-line input,
 .chat-composer .composer-line textarea {
   background: transparent;
   border-color: transparent;
+  font-size: var(--font-md);
+}
+
+/* Focus is shown on the whole well, not as a box inside it: the field is the
+   well. The ring is the same accent ring `base.css` gives every control, moved
+   one level out, so keyboard focus stays visible. */
+.chat-composer .composer-line > input:focus-visible,
+.chat-composer .composer-line > textarea:focus-visible {
+  outline: none;
+}
+
+.chat-composer .composer-line:has(> input:focus-visible, > textarea:focus-visible) {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.composer-line .composer-attach,
+.composer-line .composer-emoji,
+.composer-line .composer-buzz {
+  border-color: transparent;
+  background: transparent;
+  color: var(--apagado);
+}
+
+.composer-line .composer-attach:hover,
+.composer-line .composer-emoji:hover:not(:disabled),
+.composer-line .composer-buzz:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--bg-hover);
+  color: var(--titulo);
+}
+
+@media (min-width: 481px) {
+  .composer-enviar.primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    color: var(--accent);
+  }
+
+  .composer-enviar.primary:hover:not(:disabled) {
+    background: var(--bg-hover);
+  }
+
+  .composer-enviar.primary:disabled {
+    color: var(--discreto);
+    opacity: 0.6;
+  }
+
+  .composer-enviar svg {
+    display: block;
+  }
+
+  .composer-enviar-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 /* ------------------------------------------------------------ the controls */
 
-/* The primary from the boards: gradient from indigo to accent, with dark text.
-   The glow around it ("subtle glow on pink and blue
-   buttons") is only outer shadow: the background and letter stay the same, and
-   so does the contrast. */
+/*
+  The buttons, shadcn-style: solid fills, no gradient, no glow. Primary is the
+  brand fill with dark text (13.5:1), lighter under the cursor; destructive is
+  the red fill with white text (4.5:1); outline buttons are a hairline on the
+  surface.
+*/
 .primary {
-  background: linear-gradient(135deg, var(--indigo), var(--accent));
+  background: var(--accent-deep);
   color: var(--on-accent);
-  box-shadow:
-    0 4px 10px color-mix(in srgb, var(--accent) 14%, transparent),
-    0 0 14px color-mix(in srgb, var(--accent) 26%, transparent);
+  box-shadow: none;
 }
 
 .primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--indigo), var(--accent));
-  filter: brightness(1.08);
+  background: var(--accent-deep-hover);
 }
 
-/* Destroy and hang up: full pink with dark text. 6.5:1 measured. The glow is
-   from the primary, in the button color. */
+.primary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-deep) 88%, #000);
+}
+
 .danger:not(.ghost) {
-  background: var(--danger);
+  background: var(--danger-fill);
   color: var(--on-danger);
-  box-shadow:
-    0 4px 10px color-mix(in srgb, var(--danger) 14%, transparent),
-    0 0 14px color-mix(in srgb, var(--danger) 26%, transparent);
-}
-
-/* Disabled doesn't draw attention: no glow. */
-.primary:disabled,
-.danger:not(.ghost):disabled {
   box-shadow: none;
 }
 
 .danger:not(.ghost):hover:not(:disabled) {
-  background: var(--danger);
-  filter: brightness(1.08);
+  background: color-mix(in srgb, var(--danger-fill) 86%, #000);
 }
 
 .action,
 .ghost,
 .chip {
-  border-color: var(--poco-contorno);
+  border-color: var(--line-forte);
 }
 
 .action {
-  background: var(--poco);
-  color: var(--secundario);
+  background: var(--bg-raised);
+  color: var(--titulo);
 }
 
+/* Hover never repaints a chosen chip (`.chip.on`): it keeps the brand fill. */
 .action:hover,
 .ghost:hover:not(:disabled),
-.chip:hover {
+.chip:not(.on):hover {
+  background: var(--bg-hover);
   color: var(--titulo);
-  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  border-color: var(--line-forte);
 }
 
-/* The input fields are wells: darker than glass. */
+/* The input fields are wells. */
 .sheet-body input,
 .sheet-body textarea,
 .prompt input,
@@ -246,32 +498,52 @@ h3 {
 .chat-composer input,
 select {
   background-color: var(--poco);
-  border-color: var(--poco-contorno);
+  border-color: var(--line-forte);
+}
+
+.sheet-body input:focus,
+.sheet-body textarea:focus,
+.prompt input:focus,
+select:focus {
+  border-color: var(--accent);
 }
 
 select option {
-  background: var(--vidro-solido);
+  background: var(--flutuante);
 }
 
-/* The switch button darkens against the light accent. */
+/* The switch knob is the dark ink on the brand fill. */
 .interruptor[aria-checked="true"] .interruptor-botao {
   background: var(--on-accent);
+}
+
+/*
+  Tooltips: the popover colour with a firm outline and a shadow, so they stand
+  off whatever they cover (they used the raised tone, which melted into a
+  highlighted row). Form and placement stay in `components.css`.
+*/
+[data-tip]::after {
+  border-color: var(--line-forte);
+  background: var(--flutuante);
+  color: var(--titulo);
+  font-weight: 500;
+  box-shadow: var(--sombra-2);
+}
+
+[data-tip]::before {
+  border-color: var(--line-forte);
+  background: var(--flutuante);
 }
 
 /* --------------------------------------------- sheets, menus and notices */
 
 .overlay {
-  background: rgb(4 6 14 / 0.6);
+  background: var(--veu);
 }
 
-.toast {
-  border-left: 3px solid var(--accent);
-}
-
-/* Errors with a code: full border in pink and "Error 104" in pink. */
+/* Errors with a code: a red outline and "Error 104" in red. */
 .toast.error {
-  border: 1px solid var(--danger);
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--danger) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--danger) 55%, transparent);
 }
 
 .toast.error p::first-line {
@@ -283,72 +555,53 @@ select option {
 
 @media (min-width: 841px) {
   /* `:root .app` not `.app`: the notch margin (`movel.css`) comes after and
-     overwrites the root `padding`. Here we add the skin's padding to its own.
-
-     The left side gets the same padding as the other three and as `column-gap`. Without
-     the notch the icon bar stuck to the window edge, and the grid read crooked: padding
-     on the right, nothing on the left. See `grelhas.test.ts`. */
+     overwrites the root `padding`. The columns meet edge to edge, so the gap is
+     zero and the padding is only the notch (`grelhas.test.ts` keeps the left
+     side equal to the gap plus the notch). */
   :root .app {
-    grid-template-columns: 76px 244px 1fr;
-    column-gap: var(--space-4);
-    padding: calc(var(--space-4) + var(--seguro-topo)) calc(var(--space-4) + var(--seguro-direita))
-      calc(var(--space-4) + var(--seguro-fundo)) calc(var(--space-4) + var(--seguro-esquerda));
+    grid-template-columns: 72px 240px 1fr;
+    column-gap: 0px;
+    padding: var(--seguro-topo) var(--seguro-direita) var(--seguro-fundo) calc(0px + var(--seguro-esquerda));
   }
 
   :root .app.sem-barra {
-    grid-template-columns: 76px 1fr;
+    grid-template-columns: 72px 1fr;
   }
 
   .rail {
-    gap: var(--space-4);
-    padding: var(--space-2) 0;
+    gap: var(--space-3);
+    padding: var(--space-4) 0;
   }
 
   .rail-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
 
   .sidebar {
-    border-radius: var(--radius-lg);
     overflow: hidden;
   }
 
-  /* No `row-gap`: the grid has eight rows and almost all come empty, and a
-     `row-gap` pays the spacing between empty rows too. The padding goes at the top. */
+  /* No `row-gap`: the grid has eight rows and almost all come empty. */
   .main {
-    background: transparent;
-    grid-template-rows: auto 56px auto auto auto minmax(0, 1fr) auto auto;
-  }
-
-  .main > .topbar {
-    margin-bottom: var(--space-3);
-  }
-
-  /* The input bar spans the full width of the main area, like the top bar: without
-     the 20px inner margin on each side, it ended 15px before the end of the members
-     panel and did not align with anything. The capsule has
-     its own padding; the margin was extra. */
-  .chat-composer,
-  .chat-escrita-trancada {
-    padding-left: 0;
-    padding-right: 0;
+    grid-template-rows: auto 48px auto auto auto minmax(0, 1fr) auto auto;
   }
 
   .main.with-members {
-    column-gap: var(--space-4);
+    column-gap: 0;
   }
 
   .topbar {
-    border-radius: var(--radius-lg);
-    padding: 0 18px;
+    padding: 0 var(--space-5);
+    box-shadow: 0 1px 0 rgb(var(--sombra-cor) / calc(0.12 * var(--sombra-forca)));
+    z-index: 1;
   }
 
   .members {
-    border-radius: var(--radius-lg);
     overflow: hidden;
   }
 }
+
 
 /* ------------------------------------------------- the call, in the shell */
 
@@ -449,18 +702,18 @@ select option {
 
 /* gate */
 /*
-  The gate in midnight skin: sign in, create account, import, pair, another
-  tab, revoked device, and the opening.
+  The gate: sign in, create account, import, pair, another tab, revoked
+  device, and the opening.
 
-  The background (the two lights and still rain) comes from `fundo.css`, which
-  serves `.gate` like it serves `body`. Here is the shape: a glass card centered
-  with faint cyan outline, fields as wells, primary with cyan-to-indigo gradient
-  and dark text, errors in pink at the field location, and the opening.
+  The backdrop is the deepest surface (`fundo.css`). Here is the shape: a
+  solid card centered with a hairline, fields as wells, the brand primary with
+  dark text, errors in red at the field location, and the opening.
 */
 
-/* The card text color is in `paineis.css`. */
+/* The card color is in `paineis.css`. */
 .gate-card {
   border: 1px solid var(--portao-contorno);
+  box-shadow: var(--sombra-3);
 }
 
 .gate-card h1 {
@@ -479,7 +732,7 @@ select option {
 /* Focus: the accent ring from `base.css`, flush with the well (1px not 2px,
    because with the field outline it read as two rings). */
 .gate-card input:not([type="checkbox"]):focus {
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  border-color: var(--accent);
 }
 
 .gate-card input:not([type="checkbox"]):focus-visible {
@@ -499,18 +752,15 @@ select option {
   font-size: var(--font-base);
 }
 
-/* Primary: cyan to indigo gradient, dark text. 6.5:1 or better on both. */
+/* Primary: the same solid brand fill as everywhere else. */
 .gate .primary {
-  background: linear-gradient(135deg, var(--accent), var(--indigo));
+  background: var(--accent-deep);
   color: var(--on-accent);
-  /* Same brightness as the primary button outside the gate. */
-  box-shadow:
-    0 4px 12px color-mix(in srgb, var(--accent) 14%, transparent),
-    0 0 14px color-mix(in srgb, var(--accent) 26%, transparent);
+  box-shadow: none;
 }
 
 .gate .primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--accent), var(--indigo));
+  background: var(--accent-deep-hover);
 }
 
 .gate .ghost,
@@ -536,12 +786,12 @@ select option {
   font-weight: 700;
 }
 
-/* The warning: cyan line on the left, and quiet text. */
+/* The warning: a brand line on the left, and quiet text. */
 .gate-warning {
-  border-left-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  border-left-color: var(--accent);
 }
 
-/* The invite and revoked device, shown over the gate: glass too. */
+/* The invite and revoked device, shown over the gate. */
 .gate-convite {
   border-color: var(--portao-contorno);
   border-radius: var(--radius-md);
@@ -604,32 +854,23 @@ select option {
   height: var(--abertura-lado);
 }
 
-/* The ring: one thin complete circle, and on top a ring in four quarters with
-   the site colors, rotating.
-   
-   The requirement: "the circle around Orwell divided into 4 parts
-   with site colors alternately". The quarters are cyan, indigo, pink and green
-   (`--acento`, `--indigo`, `--rosa`, `--presenca`: the four skin colors, in the
-   order the site uses them), adjacent with no gap: this was chosen from four
-   versions (one with gaps, one with two colors, this one, and one with cyan and
-   pink). Drawn with a `conic-gradient` clipped to a ring with a radial mask: a
-   `border` can only paint four sides, and the sides of a circle are not quarters.
-   
-   Then: "gradients between colors and more speeds".
-   The four colors no longer have edges: each fades into the next, and the last
-   fades back to the first, so the loop seam does not show. The ring no longer
-   spins at constant speed: starts fast, brakes mid-loop, slows down, speeds up
-   again to close the loop (`abertura-gira-vivo`, one curve per segment). Still
-   only `transform`, on the compositor. The small ring on the button ("Opening...")
-   keeps constant speed: it is a letter, not a signal.
-   
-   3px and `--abertura-volta` per loop: was a 1.5px arc at 2.4s, and appeared
-   stopped. */
+/* The ring: one thin quiet track, and on top a single brand arc that fades
+   to nothing at its tail, rotating.
+
+   Until 1.4 the arc was four colours (cyan, indigo, pink, green) blending
+   into each other, with a glow. The flat skin keeps one colour, no glow: the
+   motion says "working", and the brand says whose. Drawn with a
+   `conic-gradient` clipped to a ring with a radial mask.
+
+   The ring does not spin at constant speed: starts fast, brakes mid-loop,
+   speeds up again to close the loop (`abertura-gira-vivo`, one curve per
+   segment). Only `transform`, on the compositor. The small ring on the button
+   ("Opening...") keeps constant speed: it is a letter, not a signal. */
 .abertura-anel {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 3px solid color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 3px solid var(--line);
 }
 
 .abertura-anel::after {
@@ -637,26 +878,17 @@ select option {
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    var(--acento) 0deg,
-    var(--indigo) 90deg,
-    var(--rosa) 180deg,
-    var(--presenca) 270deg,
-    var(--acento) 360deg
-  );
+  background: conic-gradient(from 0deg, transparent 0deg, var(--acento) 300deg, var(--acento) 360deg);
   /* Only the 3px crown: the center stays transparent for the mark. */
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 2.5px));
   mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 2.5px));
-  filter: drop-shadow(0 0 8px var(--portao-brilho));
   animation: abertura-gira-vivo var(--abertura-volta) linear infinite;
 }
 
 .abertura-marca {
   width: calc(var(--abertura-lado) / 2);
   height: calc(var(--abertura-lado) / 2);
-  color: var(--accent);
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 22%, transparent));
+  color: var(--titulo);
 }
 
 /* Each banner lights in its turn: the line number (`--linha`, 0 to 6) sets the delay. */

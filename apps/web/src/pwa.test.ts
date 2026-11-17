@@ -83,11 +83,11 @@ describe("o manifesto", () => {
 
   it("tem as cores da aplicação, e a da barra é a mesma da meta", () => {
     const meta = /<meta name="theme-color" content="([^"]+)"/.exec(html)?.[1]
-    expect(meta).toBe("#080c1a")
+    expect(meta).toBe("#17181b")
     expect(manifesto.theme_color).toBe(meta)
     // `--bg-deep`: the startup screen must not flash in another color.
-    expect(manifesto.background_color).toBe("#080c1a")
-    expect(ler("packages/ui/src/styles/tokens.css")).toMatch(/--fundo:\s*#080c1a/)
+    expect(manifesto.background_color).toBe("#17181b")
+    expect(ler("packages/ui/src/styles/tokens.css")).toMatch(/--fundo:\s*#17181b/)
   })
 
   it("traz os três ícones que a instalação pede", () => {

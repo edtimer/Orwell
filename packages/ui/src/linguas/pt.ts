@@ -2946,6 +2946,10 @@ export const pt = {
      */
     languageNote:
       "Muda a língua da app. As mensagens não são traduzidas.",
+    /* The colour theme: a choice about this device, beside the language. */
+    tema: "Tema",
+    temas: { escuro: "Escuro", claro: "Claro", sistema: "Sistema" },
+    temaNota: "Em Sistema, segue o tema do teu aparelho. Só muda este aparelho.",
     account: "Conta",
     /* The door to the profile editor from Settings: it used to be only through
        the account card, and whoever came here looking for the name did not find it. */

@@ -74,8 +74,10 @@
   font-size: var(--font-xs);
   padding: 2px var(--space-2);
   border-radius: var(--radius-sm);
-  background: rgb(0 0 0 / 0.65);
-  color: var(--text);
+  /* A float in the theme's colours: the black scrim it had read grey on grey
+     in the light theme. */
+  background: var(--flutuante);
+  color: var(--texto);
 }
 
 .media-trazer-botao {

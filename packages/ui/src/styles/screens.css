@@ -123,7 +123,7 @@
   width: 3px;
   height: 0;
   border-radius: 0 3px 3px 0;
-  background: var(--accent);
+  background: var(--accent-deep);
   transition: height var(--dur) var(--ease);
 }
 
@@ -620,7 +620,7 @@
 .me-audio-btn.off:hover {
   border-color: color-mix(in srgb, var(--danger) 45%, transparent);
   background: color-mix(in srgb, var(--danger) 12%, transparent);
-  color: color-mix(in srgb, var(--danger) 82%, #fff);
+  color: color-mix(in srgb, var(--danger) 82%, var(--titulo));
 }
 
 /* The written status row, below the bar, only while being edited. */
@@ -857,7 +857,7 @@
   bottom: 25%;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: var(--accent);
+  background: var(--accent-deep);
 }
 
 /* Unread shows first, before read: the full name, against the gray of the rest.
@@ -1094,12 +1094,12 @@
   gap: var(--space-2);
   padding: var(--space-4);
   font-size: var(--font-md);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: none;
   transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
 
 .sidebar-primary:hover:not(:disabled) {
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 28%, transparent);
+  box-shadow: none;
 }
 
 /* --------------------------------------- voice rooms: life, and moving people */
@@ -1245,7 +1245,7 @@
   top: -2px;
   height: 2px;
   border-radius: var(--radius-full);
-  background: var(--accent);
+  background: var(--accent-deep);
 }
 
 .room-row[draggable="true"] {
@@ -1293,7 +1293,7 @@
   right: 0;
   height: 2px;
   border-radius: var(--radius-full);
-  background: var(--accent);
+  background: var(--accent-deep);
 }
 
 .room-category.antes::before {
@@ -3260,7 +3260,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
 }
 
 .call-head-btn[aria-pressed="true"] {
-  background: var(--accent);
+  background: var(--accent-deep);
   border-color: var(--accent);
   color: var(--on-accent);
   font-weight: 600;
@@ -3396,7 +3396,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
 }
 
 .call-person-marcas > .screen-badge {
-  background: var(--accent);
+  background: var(--accent-deep);
   color: var(--on-accent);
 }
 
@@ -3438,7 +3438,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
   /* The panel tint, no filter (see `paineis.css`): the aurora shows between and
      around the cards, and shows through below them. */
   background-color: var(--painel-tinta);
-  background-image: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--indigo) 10%, transparent), transparent 60%);
+  background-image: none;
   box-shadow:
     inset 0 0 0 1px rgb(var(--brilho-cor) / 0.18),
     inset 6px 6px 18px rgb(var(--brilho-cor) / 0.12),
@@ -3616,7 +3616,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
   border: 1.5px solid var(--accent);
   background: rgb(10 14 26 / 0.7);
   color: var(--accent);
-  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: none;
 }
 
 /* The triangle sits at the eye center, not the box center: it pulls slightly. */
@@ -3986,7 +3986,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-deep);
   cursor: pointer;
 }
 
@@ -3995,7 +3995,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
   height: 13px;
   border: none;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-deep);
   cursor: pointer;
 }
 
@@ -4310,7 +4310,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
   width: min(300px, 100%);
   height: 1px;
   transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acento) 28%, transparent), transparent);
+  background: transparent;
   pointer-events: none;
 }
 
@@ -4481,9 +4481,9 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
 
 .call-btn.hangup {
   border: none;
-  background: var(--danger);
+  background: var(--danger-fill);
   color: var(--on-danger);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--danger) 22%, transparent);
+  box-shadow: none;
 }
 
 .call-btn.hangup:hover {
@@ -5445,7 +5445,7 @@ and 623 tall, and would hit the people panel. Same card, at preview scale. */
 }
 
 .carrossel-pontos .ponto.agora {
-  background: var(--accent);
+  background: var(--accent-deep);
 }
 
 /**
@@ -6061,7 +6061,7 @@ button.tag-pill[aria-pressed="true"] {
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-deep);
   cursor: pointer;
 }
 
@@ -6070,7 +6070,7 @@ button.tag-pill[aria-pressed="true"] {
   height: 13px;
   border: none;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-deep);
   cursor: pointer;
 }
 
@@ -7081,7 +7081,7 @@ button.tag-pill[aria-pressed="true"] {
 
 .setup-dots li.current {
   width: 20px;
-  background: var(--accent);
+  background: var(--accent-deep);
 }
 
 .setup-form {
@@ -7631,7 +7631,7 @@ button.tag-pill[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--accent);
   font-weight: 600;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: none;
 }
 
 .notif-corpo {
@@ -7697,8 +7697,8 @@ button.tag-pill[aria-pressed="true"] {
   bottom: 30px;
   width: 2px;
   border-radius: var(--radius-full);
-  background: var(--accent);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
+  background: var(--accent-deep);
+  box-shadow: none;
 }
 
 .notif-evento {
@@ -7712,8 +7712,8 @@ button.tag-pill[aria-pressed="true"] {
   width: 12px;
   height: 12px;
   border-radius: var(--radius-full);
-  background: var(--accent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
+  background: var(--accent-deep);
+  box-shadow: none;
 }
 
 /* A single event needs no line. */
@@ -7815,7 +7815,7 @@ button.tag-pill[aria-pressed="true"] {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-deep);
   flex: none;
 }
 
@@ -8810,7 +8810,7 @@ button.tag-pill[aria-pressed="true"] {
   height: 18px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-full);
-  background: var(--accent);
+  background: var(--accent-deep);
   color: var(--on-accent);
   font-size: 11px;
   font-weight: 700;
@@ -8945,7 +8945,7 @@ button.tag-pill[aria-pressed="true"] {
   height: 18px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-full);
-  background: var(--accent);
+  background: var(--accent-deep);
   color: var(--on-accent);
   font-size: 11px;
   font-weight: 700;
@@ -10702,7 +10702,7 @@ button.message-citacao:focus-visible {
   position: absolute;
   inset: 0;
   transform-origin: left center;
-  background: linear-gradient(90deg, var(--indigo), var(--accent));
+  background: var(--accent-deep);
   transition: transform 90ms linear;
 }
 
@@ -11223,7 +11223,7 @@ button.message-citacao:focus-visible {
   border: 1px solid color-mix(in srgb, var(--acento) 18%, transparent);
   border-radius: 12px;
   background: var(--poco);
-  box-shadow: inset 0 0 24px color-mix(in srgb, var(--acento) 6%, transparent);
+  box-shadow: none;
 }
 
 .audio-visor-tempo {
@@ -11246,7 +11246,7 @@ button.message-citacao:focus-visible {
   position: absolute;
   inset: 0;
   color: var(--acento);
-  text-shadow: 0 0 10px color-mix(in srgb, var(--acento) 45%, transparent);
+  text-shadow: none;
 }
 
 .audio-visor:not(.a-tocar) .audio-visor-digitos {
@@ -11307,7 +11307,7 @@ button.message-citacao:focus-visible {
   height: 12px;
   border-radius: 3px;
   background: var(--acento);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--acento) 55%, transparent);
+  box-shadow: none;
 }
 
 .partilhar-audio .sheet-body input[type="range"]::-moz-range-thumb {
@@ -11361,7 +11361,7 @@ button.message-citacao:focus-visible {
   border: 0;
   background: var(--acento);
   color: var(--on-accent);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--acento) 30%, transparent);
+  box-shadow: none;
 }
 
 .audio-tecla.principal:hover:not(:disabled) {
@@ -12061,10 +12061,10 @@ button.message-citacao:focus-visible {
 /* A message that mentions me (me, @all, or a role I hold): lit like Discord,
    a soft ground and a bar on the left.
 
-   The line has no side padding, so the bar used to sit on the first 3 px of the
-   face. The lit line now reaches 8 px into the timeline's own padding and pads
-   the same 8 px back: the bar sits clear of the face, and the face and text stay
-   in the same column as the unlit lines around it.
+   Every row reaches 16 px into the timeline's own padding and pads the same
+   16 px back (`pele.css`, 1.4), and the lit line says the same here: the bar
+   sits at the row's edge, clear of the face, and the face and text stay in the
+   same column as the unlit lines around it.
 
    `:hover` is named here because the skin (`pele.css`, loaded later) clears the
    hover ground of every line with a rule of the same weight, and the lit ground
@@ -12073,8 +12073,8 @@ button.message-citacao:focus-visible {
    that way. The hover keeps the rest ground; only a real pointer darkens it a
    little, like Discord. */
 .message.menciona-me {
-  margin-inline-start: calc(-1 * var(--space-3));
-  padding-inline-start: var(--space-3);
+  margin-inline-start: calc(-1 * var(--space-5));
+  padding-inline-start: var(--space-5);
   background: color-mix(in srgb, var(--accent) 9%, transparent);
   box-shadow: inset 3px 0 0 var(--accent);
 }

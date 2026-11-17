@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef } from "react"
 import { useTimeout } from "../../hooks/useTimeout.js"
 import { strings } from "../../strings.js"
 import { MARCA_CHEIA } from "../../marca.gen.js"
-import { LINHA_DA_TARJA } from "./abertura-marcacao.js"
+import { LADO_DA_MARCA, LINHA_DA_TARJA } from "./abertura-marcacao.js"
 import { aberturaDesmontou, aberturaMontou, origemDaAbertura } from "./abertura-viva.js"
 
 /**
@@ -56,7 +56,15 @@ export function Splash({
       <div className="abertura">
         <div className="abertura-sinal" aria-hidden="true">
           <span className="abertura-anel" />
-          <svg className="abertura-marca" viewBox="0 0 24 24" fill="currentColor" focusable="false">
+          {/* Sized in the markup too: see `LADO_DA_MARCA`. */}
+          <svg
+            className="abertura-marca"
+            width={LADO_DA_MARCA}
+            height={LADO_DA_MARCA}
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            focusable="false"
+          >
             {MARCA_CHEIA.map((d) => (
               <path key={d} d={d} style={{ "--linha": LINHA_DA_TARJA.get(d) } as React.CSSProperties} />
             ))}
